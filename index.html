@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>พิทักษ์รักษ์รังสิต — ระบบจัดการของบริจาค</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="site-header" id="site-header"></header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="hero-eyebrow" data-i18n="hero_eyebrow"></div>
+    <h1 data-i18n="hero_title"></h1>
+    <p class="lede" data-i18n="hero_lede"></p>
+    <div class="scroll-cue"><span class="arrow">↓</span><span data-i18n="scroll_cue"></span></div>
+  </section>
+
+  <section class="stat-strip" id="stat-strip">
+    <div class="stat-cell"><div class="stat-num">21</div><div class="stat-label" data-i18n="stat_members"></div></div>
+    <div class="stat-cell"><div class="stat-num" id="stat-books">—</div><div class="stat-label" data-i18n="stat_books"></div></div>
+    <div class="stat-cell"><div class="stat-num" id="stat-delivered">—</div><div class="stat-label" data-i18n="stat_delivered"></div></div>
+  </section>
+
+  <hr class="section-divider">
+
+  <section>
+    <div class="about-card card">
+      <div class="badge-count"><b>21</b><span data-i18n="stat_members"></span></div>
+      <p data-i18n="about_process"></p>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="drives_title"></h2>
+    </div>
+    <p class="lede" data-i18n="drives_lede" style="margin-top:-14px;"></p>
+    <div id="admin-add-drive"></div>
+    <div id="drives-list"><div class="empty-state">...</div></div>
+  </section>
+
+  <hr class="section-divider">
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="timeline_preview_title"></h2>
+      <a class="see-all" href="timeline.html" data-i18n="see_all"></a>
+    </div>
+    <div id="shelf-preview"></div>
+  </section>
+</main>
+
+<footer class="footer" id="site-footer"></footer>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  renderHeader('home');
+  renderFooter();
+  const isAdmin = !!getAdminToken();
+
+  function driveCard(d){
+    return `<div class="drive-card">
+      ${isAdmin ? `<button class="btn btn-outline btn-sm drive-edit" data-edit="${d.id}" data-i18n="edit"></button>` : ''}
+      <div class="drive-item">${d.itemType || ''}</div>
+      <div class="drive-row"><b data-i18n="f_dateRange"></b>: ${d.dateStart || ''} – ${d.dateEnd || ''}</div>
+      <div class="drive-row"><b data-i18n="f_location"></b>: ${d.location || ''}</div>
+      <div class="drive-row"><b data-i18n="f_hours"></b>: ${d.hours || ''}</div>
+      <div class="edit-form sub-form" id="edit-form-${d.id}">
+        <div class="field"><label data-i18n="f_itemType"></label><input class="e-itemType" value="${d.itemType||''}"></div>
+        <div class="field"><label data-i18n="f_dateRange"></label>
+          <div style="display:flex; gap:8px;"><input class="e-start" value="${d.dateStart||''}"><input class="e-end" value="${d.dateEnd||''}"></div>
+        </div>
+        <div class="field"><label data-i18n="f_location"></label><input class="e-location" value="${d.location||''}"></div>
+        <div class="field"><label data-i18n="f_hours"></label><input class="e-hours" value="${d.hours||''}"></div>
+        <button class="btn btn-primary btn-sm" data-save="${d.id}" data-i18n="save"></button>
+        <button class="btn btn-ghost btn-sm" data-cancel="${d.id}" data-i18n="cancel"></button>
+      </div>
+    </div>`;
+  }
+
+  async function loadDrives(){
+    const res = await apiGet('getDrives', {});
+    const drives = (res && res.data) || [];
+    const el = document.getElementById('drives-list');
+    if(drives.length === 0){ el.innerHTML = `<div class="empty-state" data-i18n="empty_drives"></div>`; applyLang(); return; }
+    el.innerHTML = drives.map(driveCard).join('');
+    applyLang();
+    el.querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', ()=>{
+      document.getElementById('edit-form-'+b.dataset.edit).classList.toggle('open');
+    }));
+    el.querySelectorAll('[data-cancel]').forEach(b=> b.addEventListener('click', ()=>{
+      document.getElementById('edit-form-'+b.dataset.cancel).classList.remove('open');
+    }));
+    el.querySelectorAll('[data-save]').forEach(b=> b.addEventListener('click', async ()=>{
+      const id = b.dataset.save;
+      const form = document.getElementById('edit-form-'+id);
+      showToast(t('saving'));
+      await apiPost('updateDrive', {
+        driveId: id,
+        itemType: form.querySelector('.e-itemType').value,
+        dateStart: form.querySelector('.e-start').value,
+        dateEnd: form.querySelector('.e-end').value,
+        location: form.querySelector('.e-location').value,
+        hours: form.querySelector('.e-hours').value,
+      });
+      showToast(t('saved'));
+      loadDrives();
+    }));
+  }
+
+  if(isAdmin){
+    document.getElementById('admin-add-drive').innerHTML = `
+      <button class="add-inline-btn" id="add-drive-btn" data-i18n="add_drive"></button>
+      <div class="card sub-form" id="add-drive-form" style="margin-bottom:16px;">
+        <div class="field"><label data-i18n="f_itemType"></label><input id="nd-itemType"></div>
+        <div class="field"><label data-i18n="f_dateRange"></label>
+          <div style="display:flex; gap:8px;"><input id="nd-start" placeholder="24/06/2569"><input id="nd-end" placeholder="24/07/2569"></div>
+        </div>
+        <div class="field"><label data-i18n="f_location"></label><input id="nd-location"></div>
+        <div class="field"><label data-i18n="f_hours"></label><input id="nd-hours"></div>
+        <button class="btn btn-primary btn-sm" id="nd-save" data-i18n="save"></button>
+      </div>`;
+    applyLang();
+    document.getElementById('add-drive-btn').addEventListener('click', ()=>{
+      document.getElementById('add-drive-form').classList.toggle('open');
+    });
+    document.getElementById('nd-save').addEventListener('click', async ()=>{
+      showToast(t('saving'));
+      await apiPost('addDrive', {
+        itemType: document.getElementById('nd-itemType').value,
+        dateStart: document.getElementById('nd-start').value,
+        dateEnd: document.getElementById('nd-end').value,
+        location: document.getElementById('nd-location').value,
+        hours: document.getElementById('nd-hours').value,
+      });
+      showToast(t('saved'));
+      document.getElementById('add-drive-form').classList.remove('open');
+      loadDrives();
+    });
+  }
+
+  async function load(){
+    loadDrives();
+    const res = await apiGet('getTimeline', { limit: 4 });
+    renderShelf('shelf-preview', (res && res.data) || [], { expandable: true });
+
+    const stats = await apiGet('getStats');
+    if(stats && stats.data){
+      document.getElementById('stat-books').textContent = stats.data.books ?? '—';
+      document.getElementById('stat-delivered').textContent = stats.data.deliveries ?? '—';
+    }
+  }
+  load();
+</script>
+</body>
+</html>

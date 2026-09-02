@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ขายของ — พิทักษ์รักษ์รังสิต</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="site-header" id="site-header"></header>
+
+<main class="wrap">
+  <section style="padding-top:40px;">
+    <h1 data-i18n="shopping_title"></h1>
+    <p class="lede" data-i18n="shopping_lede"></p>
+  </section>
+  <section id="shop-section" style="padding-top:8px;">
+    <div id="shop-grid"><div class="empty-state">...</div></div>
+  </section>
+
+  <section id="order-section" style="display:none;">
+    <div class="card" style="max-width:520px;">
+      <h2 data-i18n="order_form_title" style="font-size:1.2rem;"></h2>
+      <form id="order-form">
+        <div class="field"><label data-i18n="f_name"></label><input required id="f-name"></div>
+        <div class="field"><label data-i18n="f_contact"></label><input required id="f-contact"></div>
+        <div class="field"><label data-i18n="f_address"></label><textarea required id="f-address"></textarea></div>
+        <div class="field"><label data-i18n="f_slip"></label><input type="file" accept="image/*" id="f-slip-file"></div>
+        <button class="btn btn-primary" type="submit" data-i18n="f_submit"></button>
+        <button class="btn btn-ghost" type="button" id="cancel-order" style="margin-left:8px;">✕</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="footer" id="site-footer"></footer>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  renderHeader('shopping');
+  renderFooter();
+  let selectedId = null;
+
+  async function load(){
+    const res = await apiGet('getShopping', {});
+    renderShopGrid('shop-grid', (res && res.data) || [], onOrderClick);
+  }
+  function onOrderClick(id){
+    selectedId = id;
+    document.getElementById('order-section').style.display = 'block';
+    document.getElementById('order-section').scrollIntoView({behavior:'smooth'});
+  }
+  document.getElementById('cancel-order').addEventListener('click', ()=>{
+    document.getElementById('order-section').style.display = 'none';
+  });
+  document.getElementById('order-form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    const slipUrl = await uploadPhotoIfAny(document.getElementById('f-slip-file'));
+    showToast(t('saving'));
+    const res = await apiPost('createOrder', {
+      itemId: selectedId,
+      name: document.getElementById('f-name').value,
+      contact: document.getElementById('f-contact').value,
+      address: document.getElementById('f-address').value,
+      slip: slipUrl,
+    });
+    submitBtn.disabled = false;
+    if(res && res.ok){
+      showToast(t('order_submitted'));
+      document.getElementById('order-section').style.display = 'none';
+      document.getElementById('order-form').reset();
+      load();
+    } else if(res && res.error === 'sold_out'){
+      showToast(t('sold_out_race'));
+      document.getElementById('order-section').style.display = 'none';
+      load();
+    } else {
+      showToast(t('error_generic'));
+    }
+  });
+  load();
+</script>
+</body>
+</html>

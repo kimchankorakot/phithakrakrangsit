@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สต็อกของบริจาค — พิทักษ์รักษ์รังสิต</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="site-header" id="site-header"></header>
+
+<main class="wrap" style="padding-top:32px;">
+  <h1 style="font-size:1.6rem;" data-i18n="stock_title"></h1>
+  <p class="lede" data-i18n="stock_lede"></p>
+
+  <div class="card" style="margin-bottom:28px;">
+    <h2 style="font-size:1.1rem;" data-i18n="stock_upload_title"></h2>
+    <form id="stock-form">
+      <div class="field"><label data-i18n="f_photo"></label><input type="file" accept="image/*" id="s-photo-file"></div>
+      <div class="field"><label data-i18n="f_title"></label><input id="s-title" required></div>
+      <div class="field"><label data-i18n="f_category"></label><input id="s-category" required></div>
+      <div class="field"><label data-i18n="f_qty"></label><input id="s-qty" type="number" min="1" value="1" required></div>
+      <div class="field">
+        <label data-i18n="f_sellable"></label>
+        <div class="radio-row">
+          <label><input type="radio" name="sellable" value="yes" checked> <span data-i18n="opt_sellable"></span></label>
+          <label><input type="radio" name="sellable" value="no"> <span data-i18n="opt_unsellable"></span></label>
+        </div>
+      </div>
+      <div class="field" id="price-field"><label data-i18n="f_price"></label><input id="s-price" type="number" min="0"></div>
+      <button class="btn btn-primary" type="submit" data-i18n="f_add"></button>
+    </form>
+  </div>
+
+  <div class="section-title"><h2 style="font-size:1.1rem;" data-i18n="stock_sellable_title"></h2></div>
+  <div id="stock-sellable" class="grid" style="margin-bottom:32px;"></div>
+
+  <div class="section-title"><h2 style="font-size:1.1rem;" data-i18n="stock_unsellable_title"></h2></div>
+  <div id="stock-unsellable" class="grid"></div>
+</main>
+
+<footer class="footer" id="site-footer"></footer>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  requireAdmin('login.html');
+  renderHeader('stock');
+  renderFooter();
+
+  document.querySelectorAll('input[name="sellable"]').forEach(r=>{
+    r.addEventListener('change', ()=>{
+      document.getElementById('price-field').style.display =
+        document.querySelector('input[name="sellable"]:checked').value === 'yes' ? 'block' : 'none';
+    });
+  });
+
+  function editForm(item){
+    return `<div class="sub-form" id="edit-${item.id}">
+      <div class="field"><label data-i18n="f_photo"></label><input type="file" accept="image/*" class="e-photo-file"></div>
+      <div class="field"><label data-i18n="f_title"></label><input class="e-title" value="${item.title||''}"></div>
+      <div class="field"><label data-i18n="f_category"></label><input class="e-category" value="${item.category||''}"></div>
+      <div class="field"><label data-i18n="f_qty"></label><input class="e-qty" type="number" min="1" value="${item.quantity||1}"></div>
+      ${item.sellable ? `<div class="field"><label data-i18n="f_price"></label><input class="e-price" type="number" min="0" value="${item.price||0}"></div>` : ''}
+      <button class="btn btn-primary btn-sm" data-save-edit="${item.id}" data-i18n="save"></button>
+      <button class="btn btn-ghost btn-sm" data-cancel-edit="${item.id}" data-i18n="cancel"></button>
+    </div>`;
+  }
+
+  function sellableCard(item){
+    const available = Number(item.quantity||0) - Number(item.soldCount||0) - Number(item.reservedCount||0);
+    const reserved = Number(item.reservedCount||0);
+    const div = document.createElement('div');
+    div.className = 'book-card';
+    div.innerHTML = `
+      <div class="thumb ${item.photo?'':'empty'}">${item.photo ? `<img src="${item.photo}">` : 'no photo'}</div>
+      <div class="info">
+        <div class="title">${item.title || item.category || ''}</div>
+        <div class="price">฿${item.price || 0}</div>
+        <span class="qty-badge">${available>0 ? t('left_count',{n:available}) : t('sold_out')} ${reserved>0 ? t('reserved_note',{n:reserved}) : ''}</span>
+        <div class="sub-form" id="record-${item.id}">
+          <div class="field"><label data-i18n="f_outcomeQty"></label><input type="number" min="1" max="${available}" class="rq" value="1"></div>
+          <div class="field"><label data-i18n="f_dest"></label><input class="rdest"></div>
+          <div class="field"><label data-i18n="f_donateDate"></label><input class="rdate" type="date"></div>
+          <button class="btn btn-outline btn-sm" data-record="${item.id}" data-i18n="record_sale_btn"></button>
+        </div>
+        <div class="stock-actions">
+          ${available>0 ? `<button class="btn btn-ghost btn-sm" data-toggle="${item.id}" data-i18n="record_sale_title"></button>` : ''}
+          <button class="btn btn-ghost btn-sm" data-toggle-edit="${item.id}" data-i18n="edit"></button>
+          <button class="btn btn-ghost btn-sm" data-delete="${item.id}" data-i18n="delete"></button>
+        </div>
+        ${editForm(item)}
+      </div>`;
+    return div;
+  }
+  function unsellableCard(item){
+    const div = document.createElement('div');
+    div.className = 'book-card';
+    div.innerHTML = `
+      <div class="thumb ${item.photo?'':'empty'}">${item.photo ? `<img src="${item.photo}">` : 'no photo'}</div>
+      <div class="info">
+        <div class="title">${item.title || item.category || ''}</div>
+        <span class="qty-badge">${t('left_count',{n:Number(item.quantity||0)-Number(item.soldCount||0)})}</span>
+        ${item.action ? `<span class="badge approved">${item.action === 'donate' ? t('opt_donate_direct') : t('opt_weight_sale')}</span>` : `
+        <div class="stock-actions">
+          <button class="btn btn-outline btn-sm" data-donate="${item.id}" data-i18n="opt_donate_direct"></button>
+          <button class="btn btn-outline btn-sm" data-weight="${item.id}" data-i18n="opt_weight_sale"></button>
+        </div>
+        <div class="sub-form" id="donate-form-${item.id}">
+          <div class="field"><label data-i18n="f_donateDest"></label><input class="dd-dest"></div>
+          <div class="field"><label data-i18n="f_donateDate"></label><input class="dd-date" type="date"></div>
+          <button class="btn btn-primary btn-sm" data-confirm-donate="${item.id}" data-i18n="confirm_donate"></button>
+        </div>`}
+        <div class="stock-actions">
+          <button class="btn btn-ghost btn-sm" data-toggle-edit="${item.id}" data-i18n="edit"></button>
+          <button class="btn btn-ghost btn-sm" data-delete="${item.id}" data-i18n="delete"></button>
+        </div>
+        ${editForm(item)}
+      </div>`;
+    return div;
+  }
+
+  function wireCommon(scopeEl){
+    scopeEl.querySelectorAll('[data-toggle-edit]').forEach(b=> b.addEventListener('click', ()=>{
+      document.getElementById('edit-'+b.dataset.toggleEdit).classList.toggle('open');
+    }));
+    scopeEl.querySelectorAll('[data-cancel-edit]').forEach(b=> b.addEventListener('click', ()=>{
+      document.getElementById('edit-'+b.dataset.cancelEdit).classList.remove('open');
+    }));
+    scopeEl.querySelectorAll('[data-save-edit]').forEach(b=> b.addEventListener('click', async ()=>{
+      const id = b.dataset.saveEdit;
+      const form = document.getElementById('edit-'+id);
+      const newPhoto = await uploadPhotoIfAny(form.querySelector('.e-photo-file'));
+      showToast(t('saving'));
+      const priceEl = form.querySelector('.e-price');
+      await apiPost('updateStockItem', {
+        itemId: id,
+        photo: newPhoto || undefined,
+        title: form.querySelector('.e-title').value,
+        category: form.querySelector('.e-category').value,
+        quantity: Number(form.querySelector('.e-qty').value || 1),
+        price: priceEl ? Number(priceEl.value || 0) : undefined,
+      });
+      showToast(t('saved')); loadStock();
+    }));
+    scopeEl.querySelectorAll('[data-delete]').forEach(b=> b.addEventListener('click', async ()=>{
+      if(!confirm(t('confirm_delete'))) return;
+      const res = await apiPost('deleteStockItem', { itemId: b.dataset.delete });
+      if(res && res.ok === false && res.error === 'has_history'){
+        showToast(t('delete_blocked_history'));
+      }
+      loadStock();
+    }));
+  }
+
+  async function loadStock(){
+    const res = await apiGet('getStock', {});
+    const items = (res && res.data) || [];
+    const sellEl = document.getElementById('stock-sellable');
+    const unsellEl = document.getElementById('stock-unsellable');
+    sellEl.innerHTML = ''; unsellEl.innerHTML = '';
+    const sellable = items.filter(i=> i.sellable === true || i.sellable === 'TRUE');
+    const unsellable = items.filter(i=> !(i.sellable === true || i.sellable === 'TRUE'));
+    if(sellable.length===0) sellEl.innerHTML = `<div class="empty-state">—</div>`;
+    if(unsellable.length===0) unsellEl.innerHTML = `<div class="empty-state">—</div>`;
+    sellable.forEach(it => sellEl.appendChild(sellableCard(it)));
+    unsellable.forEach(it => unsellEl.appendChild(unsellableCard(it)));
+    applyLang();
+    wireCommon(sellEl); wireCommon(unsellEl);
+
+    sellEl.querySelectorAll('[data-toggle]').forEach(b=> b.addEventListener('click', ()=>{
+      document.getElementById('record-'+b.dataset.toggle).classList.toggle('open');
+    }));
+    sellEl.querySelectorAll('[data-record]').forEach(b=> b.addEventListener('click', async ()=>{
+      const id = b.dataset.record;
+      const scope = document.getElementById('record-'+id);
+      const qty = Number(scope.querySelector('.rq').value || 1);
+      const destination = scope.querySelector('.rdest').value;
+      const date = scope.querySelector('.rdate').value;
+      showToast(t('saving'));
+      await apiPost('recordSale', { itemId: id, qty, destination, date });
+      showToast(t('saved')); loadStock();
+    }));
+    unsellEl.querySelectorAll('[data-donate]').forEach(b=> b.addEventListener('click', ()=>{
+      document.getElementById('donate-form-'+b.dataset.donate).classList.toggle('open');
+    }));
+    unsellEl.querySelectorAll('[data-confirm-donate]').forEach(b=> b.addEventListener('click', async ()=>{
+      const id = b.dataset.confirmDonate;
+      const form = document.getElementById('donate-form-'+id);
+      showToast(t('saving'));
+      await apiPost('setStockAction', {
+        itemId: id, action: 'donate',
+        destination: form.querySelector('.dd-dest').value,
+        date: form.querySelector('.dd-date').value,
+      });
+      showToast(t('saved')); loadStock();
+    }));
+    unsellEl.querySelectorAll('[data-weight]').forEach(b=> b.addEventListener('click', async ()=>{
+      showToast(t('saving'));
+      await apiPost('setStockAction', { itemId: b.dataset.weight, action: 'weight' });
+      showToast(t('marked_weight')); loadStock();
+    }));
+  }
+
+  document.getElementById('stock-form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    const sellable = document.querySelector('input[name="sellable"]:checked').value === 'yes';
+    const photoUrl = await uploadPhotoIfAny(document.getElementById('s-photo-file'));
+    showToast(t('saving'));
+    await apiPost('addStockItem', {
+      photo: photoUrl,
+      title: document.getElementById('s-title').value,
+      category: document.getElementById('s-category').value,
+      quantity: Number(document.getElementById('s-qty').value || 1),
+      sellable,
+      price: sellable ? Number(document.getElementById('s-price').value || 0) : 0,
+    });
+    submitBtn.disabled = false;
+    showToast(t('saved'));
+    document.getElementById('stock-form').reset();
+    loadStock();
+  });
+
+  loadStock();
+</script>
+</body>
+</html>

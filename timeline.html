@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ไทม์ไลน์การบริจาค — หนังสือแบ่งปัน</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="site-header" id="site-header"></header>
+
+<main class="wrap">
+  <section style="padding-top:40px;">
+    <h1 data-i18n="timeline_title"></h1>
+    <p class="lede" data-i18n="timeline_lede"></p>
+  </section>
+  <section style="padding-top:8px;">
+    <div id="shelf-full"><div class="empty-state">...</div></div>
+  </section>
+</main>
+
+<footer class="footer" id="site-footer"></footer>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  renderHeader('timeline');
+  renderFooter();
+
+  async function load(){
+    const res = await apiGet('getTimeline', {});
+    renderShelf('shelf-full', (res && res.data) || [], { expandable: true });
+  }
+  load();
+</script>
+</body>
+</html>

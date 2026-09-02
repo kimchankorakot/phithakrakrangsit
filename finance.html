@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>การเงิน — พิทักษ์รักษ์รังสิต</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="site-header" id="site-header"></header>
+
+<main class="wrap" style="padding-top:32px;">
+  <h1 style="font-size:1.6rem;" data-i18n="finance_title"></h1>
+  <p class="lede" data-i18n="finance_lede"></p>
+
+  <div class="tabs">
+    <button class="tab-btn on" data-tab="orders" data-i18n="finance_tab_orders"></button>
+    <button class="tab-btn" data-tab="other" data-i18n="finance_tab_other"></button>
+    <button class="tab-btn" data-tab="donation" data-i18n="finance_tab_donation"></button>
+  </div>
+
+  <!-- 1. Order approval -->
+  <section class="tab-panel on" id="panel-orders">
+    <div class="section-title"><h2 style="font-size:1.1rem;" data-i18n="orders_title"></h2></div>
+    <div id="orders-list"></div>
+  </section>
+
+  <!-- 2. Other income -->
+  <section class="tab-panel" id="panel-other">
+    <div class="card" style="max-width:520px;">
+      <h2 style="font-size:1.1rem;" data-i18n="other_income_title"></h2>
+      <form id="other-form">
+        <div class="checkbox-row">
+          <input type="checkbox" id="oi-isweight">
+          <label for="oi-isweight" data-i18n="is_weight_sale"></label>
+        </div>
+        <div class="field" id="oi-pick-field" style="display:none;">
+          <label data-i18n="f_pickItem"></label>
+          <select id="oi-item"></select>
+        </div>
+        <div class="field"><label data-i18n="f_donor"></label><input id="oi-donor" required></div>
+        <div class="field"><label data-i18n="f_amount"></label><input id="oi-amount" type="number" min="0" required></div>
+        <div class="field"><label data-i18n="f_note"></label><textarea id="oi-note"></textarea></div>
+        <div class="field"><label data-i18n="f_slip"></label><input type="file" accept="image/*" id="oi-slip-file"></div>
+        <button class="btn btn-primary" type="submit" data-i18n="f_add"></button>
+      </form>
+    </div>
+  </section>
+
+  <!-- 3. Post-sale donation -->
+  <section class="tab-panel" id="panel-donation">
+    <div class="card" style="max-width:520px;">
+      <h2 style="font-size:1.1rem;" data-i18n="finance_donation_title"></h2>
+      <form id="donation-form">
+        <div class="field"><label data-i18n="f_amount"></label><input id="fd-amount" type="number" min="0" required></div>
+        <div class="field"><label data-i18n="f_dest"></label><input id="fd-dest" required></div>
+        <div class="field"><label data-i18n="f_donationBy"></label><input id="fd-by" required></div>
+        <button class="btn btn-primary" type="submit" data-i18n="f_add"></button>
+      </form>
+    </div>
+  </section>
+
+  <hr class="section-divider" style="margin:36px 0;">
+  <div class="section-title"><h2 style="font-size:1.1rem;" data-i18n="finance_ledger_title"></h2></div>
+  <div id="finance-ledger"></div>
+</main>
+
+<footer class="footer" id="site-footer"></footer>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  requireAdmin('login.html');
+  renderHeader('finance');
+  renderFooter();
+
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
+      btn.classList.add('on');
+      document.getElementById('panel-'+btn.dataset.tab).classList.add('on');
+    });
+  });
+
+  /* ---- 1. Orders ---- */
+  function orderEditForm(o){
+    return `<div class="sub-form" id="oedit-${o.id}">
+      <div class="field"><label data-i18n="f_name"></label><input class="oe-name" value="${o.name||''}"></div>
+      <div class="field"><label data-i18n="f_contact"></label><input class="oe-contact" value="${o.contact||''}"></div>
+      <div class="field"><label data-i18n="f_address"></label><textarea class="oe-address">${o.address||''}</textarea></div>
+      <button class="btn btn-primary btn-sm" data-osave="${o.id}" data-i18n="save"></button>
+      <button class="btn btn-ghost btn-sm" data-ocancel="${o.id}" data-i18n="cancel"></button>
+    </div>`;
+  }
+  async function loadOrders(){
+    const res = await apiGet('getOrders', {});
+    const list = document.getElementById('orders-list');
+    const orders = (res && res.data) || [];
+    if(orders.length === 0){ list.innerHTML = `<div class="empty-state">—</div>`; return; }
+    list.innerHTML = orders.map(o => `
+      <div class="card" style="margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+          <div>
+            <div style="font-weight:700;">${o.name} · ฿${o.price ?? ''}</div>
+            <div style="color:var(--ink-soft); font-size:0.88rem;">${o.contact || ''} — ${o.address || ''}</div>
+            ${o.slip ? `<a href="${o.slip}" target="_blank" style="font-size:0.85rem; color:var(--rust);">slip →</a>` : ''}
+          </div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <span class="badge ${o.status || 'pending'}">${o.status || 'pending'}</span>
+            ${o.status === 'pending' ? `
+              <button class="btn btn-primary btn-sm" data-act="approve" data-id="${o.id}">${t('approve')}</button>
+              <button class="btn btn-ghost btn-sm" data-act="reject" data-id="${o.id}">${t('reject')}</button>` : ''}
+            <button class="btn btn-ghost btn-sm" data-oedit-toggle="${o.id}" data-i18n="edit"></button>
+            <button class="btn btn-ghost btn-sm" data-odelete="${o.id}" data-i18n="delete"></button>
+          </div>
+        </div>
+        ${orderEditForm(o)}
+      </div>`).join('');
+    applyLang();
+    list.querySelectorAll('button[data-act]').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        await apiPost(b.dataset.act === 'approve' ? 'approveOrder' : 'rejectOrder', { orderId: b.dataset.id });
+        loadOrders(); loadFinance();
+      });
+    });
+    list.querySelectorAll('[data-oedit-toggle]').forEach(b=> b.addEventListener('click', ()=>{
+      document.getElementById('oedit-'+b.dataset.oeditToggle).classList.toggle('open');
+    }));
+    list.querySelectorAll('[data-ocancel]').forEach(b=> b.addEventListener('click', ()=>{
+      document.getElementById('oedit-'+b.dataset.ocancel).classList.remove('open');
+    }));
+    list.querySelectorAll('[data-osave]').forEach(b=> b.addEventListener('click', async ()=>{
+      const id = b.dataset.osave;
+      const form = document.getElementById('oedit-'+id);
+      showToast(t('saving'));
+      await apiPost('updateOrder', {
+        orderId: id,
+        name: form.querySelector('.oe-name').value,
+        contact: form.querySelector('.oe-contact').value,
+        address: form.querySelector('.oe-address').value,
+      });
+      showToast(t('saved')); loadOrders();
+    }));
+    list.querySelectorAll('[data-odelete]').forEach(b=> b.addEventListener('click', async ()=>{
+      if(!confirm(t('confirm_delete'))) return;
+      await apiPost('deleteOrder', { orderId: b.dataset.odelete });
+      loadOrders();
+    }));
+  }
+
+  /* ---- 2. Other income ---- */
+  document.getElementById('oi-isweight').addEventListener('change', async (e)=>{
+    document.getElementById('oi-pick-field').style.display = e.target.checked ? 'block' : 'none';
+    if(e.target.checked){
+      const res = await apiGet('getStock', {});
+      const items = ((res && res.data) || []).filter(i => i.action === 'weight');
+      const sel = document.getElementById('oi-item');
+      sel.innerHTML = items.map(i => `<option value="${i.id}">${i.title || i.category}</option>`).join('') || `<option value="">—</option>`;
+    }
+  });
+  document.getElementById('other-form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    const isWeight = document.getElementById('oi-isweight').checked;
+    const slipUrl = await uploadPhotoIfAny(document.getElementById('oi-slip-file'));
+    showToast(t('saving'));
+    await apiPost('addOtherIncome', {
+      isWeightSale: isWeight,
+      itemId: isWeight ? document.getElementById('oi-item').value : '',
+      donor: document.getElementById('oi-donor').value,
+      amount: Number(document.getElementById('oi-amount').value || 0),
+      note: document.getElementById('oi-note').value,
+      slip: slipUrl,
+    });
+    submitBtn.disabled = false;
+    showToast(t('saved'));
+    document.getElementById('other-form').reset();
+    document.getElementById('oi-pick-field').style.display = 'none';
+    loadFinance();
+  });
+
+  /* ---- 3. Post-sale donation ---- */
+  document.getElementById('donation-form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    showToast(t('saving'));
+    await apiPost('addPostSaleDonation', {
+      amount: Number(document.getElementById('fd-amount').value || 0),
+      destination: document.getElementById('fd-dest').value,
+      donor: document.getElementById('fd-by').value,
+    });
+    showToast(t('saved'));
+    document.getElementById('donation-form').reset();
+    loadFinance();
+  });
+
+  /* ---- Ledger ---- */
+  async function loadFinance(){
+    const res = await apiGet('getFinance', {});
+    const rows = (res && res.data) || [];
+    const el = document.getElementById('finance-ledger');
+    if(rows.length === 0){ el.innerHTML = `<div class="empty-state">—</div>`; return; }
+    const typeLabel = { order: t('type_order'), other: t('type_other'), donation: t('type_donation') };
+    el.innerHTML = `<div class="card"><table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+      <thead><tr style="text-align:left; border-bottom:1px solid var(--line);">
+        <th style="padding:6px;">${t('f_date')}</th><th>${t('f_type')}</th><th>${t('f_donor')}</th><th>${t('f_amount')}</th><th>${t('f_dest')}</th><th></th>
+      </tr></thead>
+      <tbody>${rows.map(r=>`<tr style="border-bottom:1px solid var(--line);">
+        <td style="padding:6px;">${r.date||''}</td><td>${typeLabel[r.type]||r.type||''}</td><td>${r.donor||''}</td><td>฿${r.amount||0}</td><td>${r.destination||''}</td>
+        <td><button class="btn btn-ghost btn-sm" data-fdelete="${r.id}" data-i18n="delete"></button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+    applyLang();
+    el.querySelectorAll('[data-fdelete]').forEach(b=> b.addEventListener('click', async ()=>{
+      if(!confirm(t('confirm_delete'))) return;
+      await apiPost('deleteFinanceEntry', { financeId: b.dataset.fdelete });
+      loadFinance();
+    }));
+  }
+
+  loadOrders();
+  loadFinance();
+</script>
+</body>
+</html>
