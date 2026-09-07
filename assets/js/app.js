@@ -1,4 +1,4 @@
-/* หนังสือแบ่งปัน — shared layout + renderers */
+/* พิทักษ์รักรังสิต - shared layout + renderers */
 
 function renderHeader(active, basePath=''){
   const admin = getAdminProfile();
@@ -20,9 +20,9 @@ function renderHeader(active, basePath=''){
   <div class="header-row">
     <a class="brand" href="${basePath}index.html">
       <svg class="brand-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <rect x="6" y="8" width="10" height="26" rx="1" fill="#3B4A3D"/>
-        <rect x="17" y="6" width="10" height="28" rx="1" fill="#A3592E"/>
-        <rect x="28" y="10" width="8" height="24" rx="1" fill="#C9A227"/>
+        <rect x="6" y="8" width="10" height="26" rx="2" fill="#34456E"/>
+        <rect x="17" y="6" width="10" height="28" rx="2" fill="#D6567F"/>
+        <rect x="28" y="10" width="8" height="24" rx="2" fill="#7C90B3"/>
       </svg>
       <span class="brand-name" data-i18n="site_name"></span>
     </a>
@@ -57,14 +57,14 @@ function renderHeader(active, basePath=''){
 
 function renderFooter(){
   const el = document.getElementById('site-footer');
-  if(el) el.innerHTML = `<div class="wrap">© ${new Date().getFullYear()} ชุมนุมพิทักษ์รักษ์รังสิต · ร.ร.สวนกุหลาบวิทยาลัย รังสิต</div>`;
+  if(el) el.innerHTML = `<div class="wrap">© ${new Date().getFullYear()} ชุมนุมพิทักษ์รักรังสิต · ร.ร.สวนกุหลาบวิทยาลัย รังสิต</div>`;
 }
 
 /* ---------------- Small shared helpers ---------------- */
 function confirmDelete(){
   return window.confirm(t('confirm_delete'));
 }
-const SPINE_COLORS = ['#3B4A3D','#A3592E','#C9A227','#7E9468','#2A362C'];
+const SPINE_COLORS = ['#34456E','#D6567F','#7C90B3','#3E8577','#212D4A'];
 function renderShelf(containerId, entries, opts={}){
   const el = document.getElementById(containerId);
   if(!entries || entries.length === 0){
