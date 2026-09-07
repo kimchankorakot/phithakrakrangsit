@@ -10,44 +10,60 @@
 <header class="site-header" id="site-header"></header>
 
 <main class="wrap">
-  <section class="hero">
-    <div class="hero-eyebrow" data-i18n="hero_eyebrow"></div>
-    <h1 data-i18n="hero_title"></h1>
-    <div class="hero-en" data-i18n="hero_en"></div>
-    <p class="lede" data-i18n="hero_lede"></p>
-    <a class="scroll-cue" href="#stat-section">
-      <span class="arrow-circle">↓</span>
-      <span data-i18n="scroll_cue"></span>
-    </a>
+  <section class="hero" id="hero-section">
+    <img class="hero-bg-photo" src="assets/club-photo.jpg" alt=""
+         onload="document.getElementById('hero-section').classList.add('has-photo')"
+         onerror="this.remove();">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow" data-i18n="hero_eyebrow"></div>
+      <h1 data-i18n="hero_title"></h1>
+      <div class="hero-en" data-i18n="hero_en"></div>
+      <p class="lede" data-i18n="hero_lede"></p>
+      <a class="scroll-cue" href="#stat-section">
+        <span class="arrow-circle">↓</span>
+        <span data-i18n="scroll_cue"></span>
+      </a>
+    </div>
   </section>
 
-  <section id="stat-section" class="stat-highlight">
-    <div class="icon">📦</div>
-    <div>
-      <div class="stat-num" id="stat-delivered-num">-</div>
-      <div class="stat-label" data-i18n="stat_items_delivered"></div>
+  <section id="stat-section" class="stat-grid">
+    <div class="stat-card">
+      <div class="icon">📦</div>
+      <div>
+        <div class="stat-num" id="stat-delivered-num">-</div>
+        <div class="stat-label" data-i18n="stat_items_delivered"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="icon">🏫</div>
+      <div>
+        <div class="stat-num" id="stat-places-num">-</div>
+        <div class="stat-label" data-i18n="stat_places"></div>
+      </div>
+    </div>
+    <div class="stat-card" id="member-stat-card">
+      <div class="icon">🙋</div>
+      <div>
+        <div class="stat-num" id="stat-members-num">-</div>
+        <div class="stat-label" data-i18n="stat_members"></div>
+      </div>
+      <div class="stat-edit-form" id="member-edit-form">
+        <input type="number" min="0" id="member-edit-input">
+        <button class="btn btn-primary btn-sm" id="member-save-btn" data-i18n="save"></button>
+        <button class="btn btn-ghost btn-sm" id="member-cancel-btn" data-i18n="cancel"></button>
+      </div>
     </div>
   </section>
 
   <section style="padding-top:0;">
     <div class="members-box">
-      <div class="members-row">
-        <span class="members-num">21</span>
-        <span class="members-label" data-i18n="stat_members"></span>
-      </div>
       <div class="section-title" style="margin-bottom:10px;">
         <h2 style="font-size:1.15rem;" data-i18n="process_title"></h2>
       </div>
       <p class="lede" style="margin:0 0 18px; font-size:0.92rem;" data-i18n="process_lede"></p>
-      <div class="process-flow" id="process-flow"></div>
+      <div class="process-flow" id="process-flow"><div class="process-rail"></div></div>
       <div class="process-detail" id="process-detail"></div>
-    </div>
-  </section>
-
-  <section>
-    <div class="photo-placeholder">
-      <div class="ph-icon">📷</div>
-      <div class="ph-label" data-i18n="ph_club_label"></div>
     </div>
   </section>
 
@@ -65,9 +81,9 @@
   <hr class="section-divider">
 
   <section>
-    <div class="photo-placeholder" style="background: linear-gradient(135deg, var(--rust) 0%, var(--slate) 100%);">
-      <div class="ph-icon">🤝</div>
-      <div class="ph-label" data-i18n="ph_donation_label"></div>
+    <div class="photo-block" id="donation-photo-block">
+      <img src="assets/donation-photo.jpg" alt="ภาพการส่งมอบและบริจาค"
+           onerror="document.getElementById('donation-photo-block').outerHTML = '<div class=&quot;photo-placeholder&quot; style=&quot;background: linear-gradient(135deg, var(--rust) 0%, var(--slate) 100%);&quot;><div class=&quot;ph-icon&quot;>🤝</div><div class=&quot;ph-label&quot; data-i18n=&quot;ph_donation_label&quot;></div></div>'; applyLang();">
     </div>
   </section>
 
@@ -95,8 +111,7 @@
   function renderProcessFlow(){
     const steps = getProcessSteps();
     const flowEl = document.getElementById('process-flow');
-    flowEl.innerHTML = steps.map((s,i)=>`
-      ${i>0 ? `<span class="process-arrow">→</span>` : ''}
+    flowEl.innerHTML = `<div class="process-rail"></div>` + steps.map((s,i)=>`
       <button class="process-step ${i===activeStep?'on':''}" data-step="${i}">
         <span class="num-circle">${i+1}</span>
         <span class="step-label">${s.label}</span>
@@ -213,9 +228,35 @@
     const stats = await apiGet('getStats');
     if(stats && stats.data){
       document.getElementById('stat-delivered-num').textContent = stats.data.itemsDelivered ?? '-';
+      document.getElementById('stat-places-num').textContent = stats.data.placesContacted ?? '-';
+      document.getElementById('stat-members-num').textContent = stats.data.memberCount ?? '21';
     }
   }
   load();
+
+  /* ---------------- Member count (admin-editable) ---------------- */
+  if(isAdmin){
+    const card = document.getElementById('member-stat-card');
+    const editBtn = document.createElement('button');
+    editBtn.className = 'stat-edit-btn';
+    editBtn.textContent = '✎';
+    editBtn.setAttribute('aria-label', t('edit'));
+    card.appendChild(editBtn);
+    const form = document.getElementById('member-edit-form');
+    editBtn.addEventListener('click', ()=>{
+      document.getElementById('member-edit-input').value = document.getElementById('stat-members-num').textContent;
+      form.classList.add('open');
+    });
+    document.getElementById('member-cancel-btn').addEventListener('click', ()=> form.classList.remove('open'));
+    document.getElementById('member-save-btn').addEventListener('click', async ()=>{
+      const val = document.getElementById('member-edit-input').value;
+      showToast(t('saving'));
+      await apiPost('updateMemberCount', { memberCount: val });
+      document.getElementById('stat-members-num').textContent = val;
+      showToast(t('saved'));
+      form.classList.remove('open');
+    });
+  }
 </script>
 </body>
 </html>
