@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>พิทักษ์รักษ์รังสิต — ระบบจัดการของบริจาค</title>
+<title>พิทักษ์รักรังสิต · ระบบจัดการของบริจาค</title>
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -13,22 +13,41 @@
   <section class="hero">
     <div class="hero-eyebrow" data-i18n="hero_eyebrow"></div>
     <h1 data-i18n="hero_title"></h1>
+    <div class="hero-en" data-i18n="hero_en"></div>
     <p class="lede" data-i18n="hero_lede"></p>
-    <div class="scroll-cue"><span class="arrow">↓</span><span data-i18n="scroll_cue"></span></div>
+    <a class="scroll-cue" href="#stat-section">
+      <span class="arrow-circle">↓</span>
+      <span data-i18n="scroll_cue"></span>
+    </a>
   </section>
 
-  <section class="stat-strip" id="stat-strip">
-    <div class="stat-cell"><div class="stat-num">21</div><div class="stat-label" data-i18n="stat_members"></div></div>
-    <div class="stat-cell"><div class="stat-num" id="stat-books">—</div><div class="stat-label" data-i18n="stat_books"></div></div>
-    <div class="stat-cell"><div class="stat-num" id="stat-delivered">—</div><div class="stat-label" data-i18n="stat_delivered"></div></div>
+  <section id="stat-section" class="stat-highlight">
+    <div class="icon">📦</div>
+    <div>
+      <div class="stat-num" id="stat-delivered-num">-</div>
+      <div class="stat-label" data-i18n="stat_items_delivered"></div>
+    </div>
   </section>
 
-  <hr class="section-divider">
+  <section style="padding-top:0;">
+    <div class="members-box">
+      <div class="members-row">
+        <span class="members-num">21</span>
+        <span class="members-label" data-i18n="stat_members"></span>
+      </div>
+      <div class="section-title" style="margin-bottom:10px;">
+        <h2 style="font-size:1.15rem;" data-i18n="process_title"></h2>
+      </div>
+      <p class="lede" style="margin:0 0 18px; font-size:0.92rem;" data-i18n="process_lede"></p>
+      <div class="process-flow" id="process-flow"></div>
+      <div class="process-detail" id="process-detail"></div>
+    </div>
+  </section>
 
   <section>
-    <div class="about-card card">
-      <div class="badge-count"><b>21</b><span data-i18n="stat_members"></span></div>
-      <p data-i18n="about_process"></p>
+    <div class="photo-placeholder">
+      <div class="ph-icon">📷</div>
+      <div class="ph-label" data-i18n="ph_club_label"></div>
     </div>
   </section>
 
@@ -44,6 +63,13 @@
   </section>
 
   <hr class="section-divider">
+
+  <section>
+    <div class="photo-placeholder" style="background: linear-gradient(135deg, var(--rust) 0%, var(--slate) 100%);">
+      <div class="ph-icon">🤝</div>
+      <div class="ph-label" data-i18n="ph_donation_label"></div>
+    </div>
+  </section>
 
   <section>
     <div class="section-title">
@@ -64,13 +90,44 @@
   renderFooter();
   const isAdmin = !!getAdminToken();
 
+  /* ---------------- Process flow (5 steps) ---------------- */
+  let activeStep = 0;
+  function renderProcessFlow(){
+    const steps = getProcessSteps();
+    const flowEl = document.getElementById('process-flow');
+    flowEl.innerHTML = steps.map((s,i)=>`
+      ${i>0 ? `<span class="process-arrow">→</span>` : ''}
+      <button class="process-step ${i===activeStep?'on':''}" data-step="${i}">
+        <span class="num-circle">${i+1}</span>
+        <span class="step-label">${s.label}</span>
+      </button>`).join('');
+    flowEl.querySelectorAll('[data-step]').forEach(b=>{
+      b.addEventListener('click', ()=>{ activeStep = Number(b.dataset.step); renderProcessFlow(); renderProcessDetail(); });
+    });
+  }
+  function renderProcessDetail(){
+    const steps = getProcessSteps();
+    const s = steps[activeStep];
+    const bullets = s.bullets ? `<ul>${s.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>` : '';
+    document.getElementById('process-detail').innerHTML = `<h3>${String(activeStep+1).padStart(2,'0')} · ${s.title}</h3><p>${s.desc}</p>${bullets}`;
+  }
+  function onLangChange(){ renderProcessFlow(); renderProcessDetail(); }
+  renderProcessFlow();
+  renderProcessDetail();
+
+  /* ---------------- Donation drives (compact + expandable) ---------------- */
   function driveCard(d){
     return `<div class="drive-card">
       ${isAdmin ? `<button class="btn btn-outline btn-sm drive-edit" data-edit="${d.id}" data-i18n="edit"></button>` : ''}
-      <div class="drive-item">${d.itemType || ''}</div>
-      <div class="drive-row"><b data-i18n="f_dateRange"></b>: ${d.dateStart || ''} – ${d.dateEnd || ''}</div>
-      <div class="drive-row"><b data-i18n="f_location"></b>: ${d.location || ''}</div>
-      <div class="drive-row"><b data-i18n="f_hours"></b>: ${d.hours || ''}</div>
+      <div class="drive-summary">
+        <div class="drive-item">${d.itemType || ''}</div>
+        <button class="btn btn-ghost btn-sm" data-toggle-details="${d.id}" data-i18n="view_details"></button>
+      </div>
+      <div class="drive-details" id="details-${d.id}">
+        <div class="drive-row"><b data-i18n="f_dateRange"></b>: ${d.dateStart || ''} – ${d.dateEnd || ''}</div>
+        <div class="drive-row"><b data-i18n="f_location"></b>: ${d.location || ''}</div>
+        <div class="drive-row"><b data-i18n="f_hours"></b>: ${d.hours || ''}</div>
+      </div>
       <div class="edit-form sub-form" id="edit-form-${d.id}">
         <div class="field"><label data-i18n="f_itemType"></label><input class="e-itemType" value="${d.itemType||''}"></div>
         <div class="field"><label data-i18n="f_dateRange"></label>
@@ -91,6 +148,9 @@
     if(drives.length === 0){ el.innerHTML = `<div class="empty-state" data-i18n="empty_drives"></div>`; applyLang(); return; }
     el.innerHTML = drives.map(driveCard).join('');
     applyLang();
+    el.querySelectorAll('[data-toggle-details]').forEach(b=> b.addEventListener('click', ()=>{
+      document.getElementById('details-'+b.dataset.toggleDetails).classList.toggle('open');
+    }));
     el.querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', ()=>{
       document.getElementById('edit-form-'+b.dataset.edit).classList.toggle('open');
     }));
@@ -152,8 +212,7 @@
 
     const stats = await apiGet('getStats');
     if(stats && stats.data){
-      document.getElementById('stat-books').textContent = stats.data.books ?? '—';
-      document.getElementById('stat-delivered').textContent = stats.data.deliveries ?? '—';
+      document.getElementById('stat-delivered-num').textContent = stats.data.itemsDelivered ?? '-';
     }
   }
   load();
