@@ -1,26 +1,30 @@
-/* หนังสือแบ่งปัน — i18n */
+/* พิทักษ์รักรังสิต i18n */
 const I18N = {
   th: {
-    site_name: "พิทักษ์รักษ์รังสิต",
+    site_name: "พิทักษ์รักรังสิต",
     nav_home: "หน้าแรก", nav_timeline: "ไทม์ไลน์", nav_shopping: "ขายของ",
     nav_stock: "สต็อกของบริจาค", nav_finance: "การเงิน", nav_login: "เข้าสู่ระบบหลังบ้าน", nav_logout: "ออกจากระบบ",
 
-    hero_eyebrow: "ชุมนุมพิทักษ์รักษ์รังสิต · ร.ร.สวนกุหลาบวิทยาลัย รังสิต",
-    hero_title: "ส่งต่อของ ส่งต่อโอกาส",
-    hero_lede: "ชุมนุมของนักเรียน ม.2–ม.6 จำนวน 21 คนที่มีจิตอาสา เปิดรับสิ่งของสภาพดี แล้วนำไปแบ่งปันโดยตรง หรือขายเพื่อนำรายได้หลังหักค่าใช้จ่าย ไปบริจาคให้ผู้ขาดแคลนและมูลนิธิ/องค์กรสาธารณกุศล โดยเฉพาะภายในจังหวัดปทุมธานี",
-    about_process: "กระบวนการ: ของที่รับมาจะถูกคัดแยก — ชิ้นที่เหมาะสมจะนำไปบริจาคโดยตรง ส่วนชิ้นอื่นๆ จะนำไปขายเพื่อนำรายได้ไปบริจาคต่อ",
-    stat_members: "สมาชิกจิตอาสา", stat_books: "สิ่งของที่รับบริจาค", stat_delivered: "ครั้งที่ส่งมอบแล้ว", stat_places: "มูลนิธิ/ทัณฑสถานที่ได้รับ",
+    hero_eyebrow: "ร.ร.สวนกุหลาบวิทยาลัย รังสิต",
+    hero_title: "พิทักษ์รักรังสิต",
+    hero_en: "Phithakrakrangsit",
+    hero_lede: "เป็นชุมนุมจิตอาสาของนักเรียนชั้นมัธยมศึกษาปีที่ 2-6 ที่มีจุดมุ่งหมายเพื่อแบ่งปันสิ่งของที่อยู่ในสภาพดีและขายสินค้าต่างๆ เพื่อนำรายได้หลังหักค่าใช้จ่ายไปบริจาคให้แก่ผู้ที่ขาดแคลนหรือไปสนับสนุนมูลนิธิและองค์กรสาธารณกุศลต่างๆ โดยเฉพาะในจังหวัดปทุมธานี",
+    about_process: "กระบวนการ: ของที่รับมาจะถูกคัดแยกก่อน ชิ้นที่เหมาะสมจะนำไปบริจาคโดยตรง ส่วนชิ้นอื่นๆ จะนำไปขายเพื่อนำรายได้ไปบริจาคต่อ",
+    stat_members: "สมาชิกจิตอาสา", stat_items_delivered: "สิ่งของที่ส่งมอบแล้ว",
 
-    scroll_cue: "เลื่อนลงดูรอบรับบริจาคปัจจุบัน",
+    scroll_cue: "เลื่อนลงเพื่อดูรายละเอียดเพิ่มเติม",
+
+    process_title: "กระบวนการดำเนินงาน",
+    process_lede: "5 ขั้นตอนหลักของชุมนุม กดแต่ละขั้นเพื่อดูรายละเอียด",
 
     drives_title: "ตอนนี้เปิดรับบริจาคอะไรอยู่",
     drives_lede: "รอบรับบริจาคปัจจุบันและที่ผ่านมา",
     add_drive: "+ เพิ่มรอบรับบริจาคใหม่", edit: "แก้ไข", save: "บันทึก", cancel: "ยกเลิก",
     f_itemType: "รับบริจาคอะไร", f_dateRange: "ช่วงวันที่รับบริจาค", f_location: "บริจาคได้ที่", f_hours: "เปิดรับเวลา",
-    empty_drives: "ยังไม่มีข้อมูลรอบรับบริจาค",
+    empty_drives: "ยังไม่มีข้อมูลรอบรับบริจาค", view_details: "ดูรายละเอียดเพิ่มเติม",
 
-    timeline_preview_title: "ความเคลื่อนไหวล่าสุด", see_all: "ดูทั้งหมด →",
-    timeline_title: "ไทม์ไลน์การทำงาน", timeline_lede: "สิ่งที่ชุมนุมทำไปแล้ว เรียงจากล่าสุด — คลิกแต่ละรายการเพื่อดูรายละเอียด",
+    timeline_preview_title: "ความเคลื่อนไหวล่าสุด", see_all: "ดูไทม์ไลน์แบบละเอียด →",
+    timeline_title: "ไทม์ไลน์การทำงาน", timeline_lede: "สิ่งที่ชุมนุมทำไปแล้ว เรียงจากล่าสุด คลิกแต่ละรายการเพื่อดูรายละเอียด",
     status_pending: "รอดำเนินการ", status_done: "ดำเนินการแล้ว",
     outcome_donated: "บริจาคให้", outcome_sold: "ขายได้",
     empty_timeline: "ยังไม่มีรายการในไทม์ไลน์", empty_batch_items: "ยังไม่มีรายละเอียดรายการย่อย",
@@ -41,7 +45,7 @@ const I18N = {
     f_photo: "รูปภาพ", f_title: "ชื่อ/รายละเอียดสิ่งของ", f_category: "ประเภท", f_qty: "จำนวน (ชิ้น)",
     f_sellable: "สถานะ", opt_sellable: "ขายได้", opt_unsellable: "ขายไม่ได้",
     f_price: "ราคาขาย (บาทต่อชิ้น)", f_add: "บันทึกเข้าสต็อก",
-    stock_sellable_title: "รายการขายได้ (ขึ้นหน้าขายของ)", stock_unsellable_title: "รายการขายไม่ได้ — เลือกวิธีจัดการ",
+    stock_sellable_title: "รายการขายได้ (ขึ้นหน้าขายของ)", stock_unsellable_title: "รายการขายไม่ได้ (เลือกวิธีจัดการ)",
     unsellable_choose: "เลือกวิธีจัดการ", opt_donate_direct: "บริจาคโดยตรง", opt_weight_sale: "ชั่งกิโลขาย",
     f_donateDest: "บริจาคให้ที่ไหน", f_donateDate: "วันที่บริจาค", confirm_donate: "ยืนยันบริจาค",
     marked_weight: "ทำเครื่องหมายรอชั่งกิโลขายแล้ว (ไปกรอกต่อที่หน้าการเงิน)",
@@ -58,8 +62,10 @@ const I18N = {
     finance_ledger_title: "สมุดบัญชีการเงิน", f_date: "วันที่", f_type: "ประเภทรายการ",
     type_order: "ขายสินค้า", type_other: "รายได้อื่น", type_donation: "บริจาคเงิน",
 
+    ph_club_label: "ภาพกิจกรรมของชุมนุม", ph_donation_label: "ภาพการส่งมอบและบริจาค",
+
     saving: "กำลังบันทึก...", saved: "บันทึกแล้ว", error_generic: "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง",
-    connect_needed: "ยังไม่ได้เชื่อมต่อ Google Apps Script — ดูวิธีตั้งค่าใน README",
+    connect_needed: "ยังไม่ได้เชื่อมต่อ Google Apps Script ดูวิธีตั้งค่าใน README",
     choose_file: "เลือกรูปภาพ", uploading: "กำลังอัปโหลดรูป...", upload_error: "อัปโหลดรูปไม่สำเร็จ ลองใหม่อีกครั้ง",
     delete: "ลบ", confirm_delete: "ยืนยันการลบ? ย้อนกลับไม่ได้",
     sold_out_race: "ขออภัย สินค้าชิ้นนี้เพิ่งถูกจองหมดพอดี กรุณาลองรายการอื่น",
@@ -68,26 +74,30 @@ const I18N = {
     delete_blocked_history: "ลบไม่ได้ เพราะรายการนี้มีประวัติขาย/บริจาคแล้ว",
   },
   en: {
-    site_name: "Pitak Rak Rangsit",
+    site_name: "Phithakrakrangsit",
     nav_home: "Home", nav_timeline: "Timeline", nav_shopping: "Shop",
     nav_stock: "Donation Stock", nav_finance: "Finance", nav_login: "Staff Login", nav_logout: "Sign out",
 
-    hero_eyebrow: "Pitak Rak Rangsit Club · Suankularb Wittayalai Rangsit School",
-    hero_title: "Pass on goods, pass on chances",
-    hero_lede: "A volunteer club of 21 students (grades 8–12) collecting items in good condition — some go straight to those in need, the rest are sold, with proceeds (minus costs) donated to foundations and charities, especially within Pathum Thani province.",
-    about_process: "Process: everything received is sorted — suitable items go straight to donation, the rest are sold to fund further donations.",
-    stat_members: "Volunteer members", stat_books: "Items received", stat_delivered: "Deliveries made", stat_places: "Partner organizations",
+    hero_eyebrow: "Suankularb Wittayalai Rangsit School",
+    hero_title: "Phithakrakrangsit",
+    hero_en: "พิทักษ์รักรังสิต",
+    hero_lede: "A volunteer club of students in grades 8–12, aiming to share items in good condition and sell others to donate the proceeds (after costs) to those in need and to foundations and charities, especially within Pathum Thani province.",
+    about_process: "Process: everything received is sorted first. Suitable items go straight to donation, and the rest are sold to fund further donations.",
+    stat_members: "Volunteer members", stat_items_delivered: "Items delivered so far",
 
-    scroll_cue: "Scroll down for the current donation drive",
+    scroll_cue: "Scroll down for more details",
+
+    process_title: "How it works",
+    process_lede: "5 main steps of the club's process. Click a step to see details.",
 
     drives_title: "What we're collecting right now",
     drives_lede: "Current and past donation drives",
     add_drive: "+ Add a new drive", edit: "Edit", save: "Save", cancel: "Cancel",
     f_itemType: "Item type", f_dateRange: "Date range", f_location: "Drop-off location", f_hours: "Open hours",
-    empty_drives: "No donation drives yet",
+    empty_drives: "No donation drives yet", view_details: "View details",
 
-    timeline_preview_title: "Latest activity", see_all: "See all →",
-    timeline_title: "Activity Timeline", timeline_lede: "Everything the club has done, most recent first — click an entry for details",
+    timeline_preview_title: "Latest activity", see_all: "View full timeline →",
+    timeline_title: "Activity Timeline", timeline_lede: "Everything the club has done, most recent first. Click an entry for details.",
     status_pending: "In progress", status_done: "Completed",
     outcome_donated: "Donated to", outcome_sold: "Sold for",
     empty_timeline: "No timeline entries yet", empty_batch_items: "No item details yet",
@@ -97,7 +107,7 @@ const I18N = {
     empty_shopping: "Nothing for sale right now",
     order_form_title: "Reservation form", f_name: "Your name", f_contact: "Contact (phone/LINE)",
     f_address: "Shipping address", f_slip: "Payment proof (photo)", f_submit: "Submit order",
-    order_submitted: "Order submitted — waiting for staff approval",
+    order_submitted: "Order submitted. Waiting for staff approval.",
 
     login_title: "Staff sign in", login_lede: "For club members only. Enter the shared staff password.",
     login_denied: "Incorrect password",
@@ -108,7 +118,7 @@ const I18N = {
     f_photo: "Photo", f_title: "Item name/description", f_category: "Category", f_qty: "Quantity",
     f_sellable: "Status", opt_sellable: "Sellable", opt_unsellable: "Not sellable",
     f_price: "Price (THB / item)", f_add: "Save to stock",
-    stock_sellable_title: "Sellable items (shown on Shop page)", stock_unsellable_title: "Not-sellable items — choose how to handle",
+    stock_sellable_title: "Sellable items (shown on Shop page)", stock_unsellable_title: "Not-sellable items (choose how to handle)",
     unsellable_choose: "Choose how to handle", opt_donate_direct: "Donate directly", opt_weight_sale: "Sell by weight",
     f_donateDest: "Donate to", f_donateDate: "Donation date", confirm_donate: "Confirm donation",
     marked_weight: "Marked for weight-sale (continue on the Finance page)",
@@ -125,21 +135,61 @@ const I18N = {
     finance_ledger_title: "Finance ledger", f_date: "Date", f_type: "Type",
     type_order: "Sale", type_other: "Other income", type_donation: "Cash donation",
 
+    ph_club_label: "Photos of club activities", ph_donation_label: "Photos of handovers and donations",
+
     saving: "Saving...", saved: "Saved", error_generic: "Something went wrong, please try again",
-    connect_needed: "Google Apps Script isn't connected yet — see README for setup",
+    connect_needed: "Google Apps Script isn't connected yet. See README for setup.",
     choose_file: "Choose photo", uploading: "Uploading photo...", upload_error: "Upload failed, please try again",
     delete: "Delete", confirm_delete: "Delete this? This can't be undone.",
-    sold_out_race: "Sorry, that item was just reserved by someone else — please try another",
+    sold_out_race: "Sorry, that item was just reserved by someone else. Please try another.",
     reserved_note: "({n} awaiting payment)",
     edit_order: "Edit order",
-    delete_blocked_history: "Can't delete — this item already has sale/donation history",
+    delete_blocked_history: "Can't delete: this item already has sale/donation history",
   }
 };
+
+/* Structured content for the 5-step process flow (not a flat string, so kept separate) */
+const PROCESS_STEPS = {
+  th: [
+    { label: "ประชาสัมพันธ์", title: "ประชาสัมพันธ์และเปิดรับบริจาค",
+      desc: "ประชาสัมพันธ์โครงการผ่านช่องทางต่าง ๆ พร้อมจัดวางจุดรับบริจาคตามสถานที่ที่เหมาะสม โดยเปิดรับสิ่งของเป็นหมวดหมู่ในแต่ละรอบ เช่น รอบหนังสือ เพื่อให้สามารถรวบรวมและจัดการสิ่งของได้อย่างเป็นระบบ" },
+    { label: "รวบรวม", title: "รวบรวมสิ่งของบริจาค",
+      desc: "รวบรวมสิ่งของที่ได้รับบริจาคทั้งหมดจากทุกจุดรับบริจาค เพื่อเตรียมเข้าสู่กระบวนการตรวจสอบและคัดแยกต่อไป" },
+    { label: "คัดแยก", title: "ตรวจสอบและคัดแยก",
+      desc: "ตรวจสอบสภาพและคัดแยกสิ่งของตามประเภท เพื่อเตรียมเข้าสู่กระบวนการบริจาคหรือจำหน่ายอย่างเหมาะสม",
+      bullets: [
+        "สิ่งของสภาพดี นำไปบริจาคโดยตรงให้แก่ผู้ที่ต้องการ",
+        "สิ่งของมูลค่าสูงหรือไม่เหมาะกับการบริจาคตรง นำไปจำหน่ายในราคาที่เหมาะสมเพื่อนำรายได้ไปบริจาคต่อ",
+      ] },
+    { label: "ประสานงาน", title: "ประสานงานกับสถานที่",
+      desc: "ติดต่อและประสานงานกับหน่วยงาน โรงเรียน มูลนิธิ หรือสถานที่ที่ต้องการรับสิ่งของโดยตรง เพื่อสอบถามความต้องการและกำหนดรายละเอียดในการส่งมอบ" },
+    { label: "ส่งต่อ", title: "ส่งต่อและบริจาค",
+      desc: "นำสิ่งของที่ผ่านการคัดเลือกและจัดเตรียมแล้ว ส่งมอบกับสถานที่ที่ต้องการโดยตรง เพื่อให้สิ่งของทุกชิ้นเกิดประโยชน์สูงสุดและถูกนำไปใช้ต่ออย่างคุ้มค่า" },
+  ],
+  en: [
+    { label: "Publicize", title: "Publicize & open the drive",
+      desc: "Promote the drive across channels and set up drop-off points. Each round focuses on one category, for example a book drive, to keep collection and handling organized." },
+    { label: "Collect", title: "Collect donated items",
+      desc: "Gather everything donated from every drop-off point, ready for inspection and sorting." },
+    { label: "Sort", title: "Inspect & sort",
+      desc: "Check condition and sort items by category, ready for either donation or sale.",
+      bullets: [
+        "Items in good condition go straight to those who need them",
+        "High-value or unsuitable-for-direct-donation items are sold at a fair price to fund further donations",
+      ] },
+    { label: "Coordinate", title: "Coordinate with recipients",
+      desc: "Contact and coordinate with organizations, schools, foundations, or sites that want items directly, to confirm needs and handover details." },
+    { label: "Deliver", title: "Deliver & donate",
+      desc: "Selected and prepared items are handed over directly to the recipient, so every item is put to the best possible use." },
+  ],
+};
+function getProcessSteps(){ return PROCESS_STEPS[getLang()] || PROCESS_STEPS.th; }
 
 function getLang(){ return localStorage.getItem('bd_lang') || 'th'; }
 function setLang(lang){
   localStorage.setItem('bd_lang', lang);
   applyLang();
+  if(typeof onLangChange === 'function') onLangChange();
 }
 function t(key, vars){
   const lang = getLang();
