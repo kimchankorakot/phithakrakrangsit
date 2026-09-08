@@ -72,6 +72,7 @@
   <section>
     <div class="section-title">
       <h2 data-i18n="drives_title"></h2>
+      <a class="see-all" href="timeline.html" data-i18n="see_all"></a>
     </div>
     <p class="lede" data-i18n="drives_lede" style="margin-top:-14px;"></p>
     <div id="admin-add-drive"></div>
@@ -85,14 +86,6 @@
       <img src="assets/donation-photo.jpg" alt="ภาพการส่งมอบและบริจาค"
            onerror="document.getElementById('donation-photo-block').outerHTML = '<div class=&quot;photo-placeholder&quot; style=&quot;background: linear-gradient(135deg, var(--rust) 0%, var(--slate) 100%);&quot;><div class=&quot;ph-icon&quot;>🤝</div><div class=&quot;ph-label&quot; data-i18n=&quot;ph_donation_label&quot;></div></div>'; applyLang();">
     </div>
-  </section>
-
-  <section>
-    <div class="section-title">
-      <h2 data-i18n="timeline_preview_title"></h2>
-      <a class="see-all" href="timeline.html" data-i18n="see_all"></a>
-    </div>
-    <div id="shelf-preview"></div>
   </section>
 </main>
 
@@ -222,8 +215,6 @@
 
   async function load(){
     loadDrives();
-    const res = await apiGet('getTimeline', { limit: 4 });
-    renderShelf('shelf-preview', (res && res.data) || [], { expandable: true });
 
     const stats = await apiGet('getStats');
     if(stats && stats.data){
