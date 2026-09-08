@@ -82,9 +82,10 @@
   <hr class="section-divider">
 
   <section>
-    <div class="photo-block" id="donation-photo-block">
-      <img src="assets/donation-photo.jpg" alt="ภาพการส่งมอบและบริจาค"
-           onerror="document.getElementById('donation-photo-block').outerHTML = '<div class=&quot;photo-placeholder&quot; style=&quot;background: linear-gradient(135deg, var(--rust) 0%, var(--slate) 100%);&quot;><div class=&quot;ph-icon&quot;>🤝</div><div class=&quot;ph-label&quot; data-i18n=&quot;ph_donation_label&quot;></div></div>'; applyLang();">
+    <div class="photo-gallery" id="donation-gallery">
+      <img class="gallery-img" src="assets/donation-photo-1.jpg" alt="ภาพการส่งมอบและบริจาค">
+      <img class="gallery-img" src="assets/donation-photo-2.jpg" alt="ภาพการส่งมอบและบริจาค">
+      <img class="gallery-img" src="assets/donation-photo-3.jpg" alt="ภาพการส่งมอบและบริจาค">
     </div>
   </section>
 </main>
@@ -248,6 +249,23 @@
       form.classList.remove('open');
     });
   }
+
+  /* ---------------- Donation photo gallery (falls back to placeholder if no photos yet) ---------------- */
+  (function(){
+    const gallery = document.getElementById('donation-gallery');
+    const imgs = Array.from(gallery.querySelectorAll('img'));
+    let failed = 0;
+    imgs.forEach(img=>{
+      img.addEventListener('error', ()=>{
+        img.remove();
+        failed++;
+        if(failed === imgs.length){
+          gallery.outerHTML = `<div class="photo-placeholder" style="background: linear-gradient(135deg, var(--rust) 0%, var(--slate) 100%);"><div class="ph-icon">🤝</div><div class="ph-label" data-i18n="ph_donation_label"></div></div>`;
+          applyLang();
+        }
+      });
+    });
+  })();
 </script>
 </body>
 </html>
