@@ -10,7 +10,8 @@ const I18N = {
     hero_en: "Phithakrakrangsit",
     hero_lede: "เป็นชุมนุมจิตอาสาของนักเรียนชั้นมัธยมศึกษาปีที่ 2-6 ที่มีจุดมุ่งหมายเพื่อแบ่งปันสิ่งของที่อยู่ในสภาพดีและขายสินค้าต่างๆ เพื่อนำรายได้หลังหักค่าใช้จ่ายไปบริจาคให้แก่ผู้ที่ขาดแคลนหรือไปสนับสนุนมูลนิธิและองค์กรสาธารณกุศลต่างๆ โดยเฉพาะในจังหวัดปทุมธานี",
     about_process: "กระบวนการ: ของที่รับมาจะถูกคัดแยกก่อน ชิ้นที่เหมาะสมจะนำไปบริจาคโดยตรง ส่วนชิ้นอื่นๆ จะนำไปขายเพื่อนำรายได้ไปบริจาคต่อ",
-    stat_members: "สมาชิกจิตอาสา", stat_items_delivered: "สิ่งของที่ส่งมอบแล้ว",
+    stat_members: "สมาชิกจิตอาสา", stat_items_delivered: "สิ่งของที่ส่งมอบแล้ว", stat_places: "หน่วยงาน/สถานที่ที่เคยติดต่อ",
+    f_memberCount: "จำนวนสมาชิก",
 
     scroll_cue: "เลื่อนลงเพื่อดูรายละเอียดเพิ่มเติม",
 
@@ -83,7 +84,8 @@ const I18N = {
     hero_en: "พิทักษ์รักรังสิต",
     hero_lede: "A volunteer club of students in grades 8–12, aiming to share items in good condition and sell others to donate the proceeds (after costs) to those in need and to foundations and charities, especially within Pathum Thani province.",
     about_process: "Process: everything received is sorted first. Suitable items go straight to donation, and the rest are sold to fund further donations.",
-    stat_members: "Volunteer members", stat_items_delivered: "Items delivered so far",
+    stat_members: "Volunteer members", stat_items_delivered: "Items delivered so far", stat_places: "Organizations contacted",
+    f_memberCount: "Member count",
 
     scroll_cue: "Scroll down for more details",
 
