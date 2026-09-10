@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>สต็อกของบริจาค — พิทักษ์รักษ์รังสิต</title>
+<title>สต็อกของบริจาค · พิทักษ์รักรังสิต</title>
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -78,7 +78,7 @@
       <div class="info">
         <div class="title">${item.title || item.category || ''}</div>
         <div class="price">฿${item.price || 0}</div>
-        <span class="qty-badge">${available>0 ? t('left_count',{n:available}) : t('sold_out')} ${reserved>0 ? t('reserved_note',{n:reserved}) : ''}</span>
+        <span class="qty-badge ${available>0 ? 'qty-available' : 'qty-soldout'}">${available>0 ? t('left_count',{n:available}) : t('sold_out')} ${reserved>0 ? t('reserved_note',{n:reserved}) : ''}</span>
         <div class="sub-form" id="record-${item.id}">
           <div class="field"><label data-i18n="f_outcomeQty"></label><input type="number" min="1" max="${available}" class="rq" value="1"></div>
           <div class="field"><label data-i18n="f_dest"></label><input class="rdest"></div>
@@ -101,8 +101,8 @@
       <div class="thumb ${item.photo?'':'empty'}">${item.photo ? `<img src="${item.photo}">` : 'no photo'}</div>
       <div class="info">
         <div class="title">${item.title || item.category || ''}</div>
-        <span class="qty-badge">${t('left_count',{n:Number(item.quantity||0)-Number(item.soldCount||0)})}</span>
-        ${item.action ? `<span class="badge approved">${item.action === 'donate' ? t('opt_donate_direct') : t('opt_weight_sale')}</span>` : `
+        <span class="qty-badge qty-available">${t('left_count',{n:Number(item.quantity||0)-Number(item.soldCount||0)})}</span>
+        ${item.action ? `<span class="badge neutral">${item.action === 'donate' ? t('opt_donate_direct') : t('opt_weight_sale')}</span>` : `
         <div class="stock-actions">
           <button class="btn btn-outline btn-sm" data-donate="${item.id}" data-i18n="opt_donate_direct"></button>
           <button class="btn btn-outline btn-sm" data-weight="${item.id}" data-i18n="opt_weight_sale"></button>
@@ -110,6 +110,7 @@
         <div class="sub-form" id="donate-form-${item.id}">
           <div class="field"><label data-i18n="f_donateDest"></label><input class="dd-dest"></div>
           <div class="field"><label data-i18n="f_donateDate"></label><input class="dd-date" type="date"></div>
+          <div class="field"><label data-i18n="f_proofPhoto"></label><input type="file" accept="image/*" class="dd-proof-file"></div>
           <button class="btn btn-primary btn-sm" data-confirm-donate="${item.id}" data-i18n="confirm_donate"></button>
         </div>`}
         <div class="stock-actions">
@@ -162,8 +163,8 @@
     sellEl.innerHTML = ''; unsellEl.innerHTML = '';
     const sellable = items.filter(i=> i.sellable === true || i.sellable === 'TRUE');
     const unsellable = items.filter(i=> !(i.sellable === true || i.sellable === 'TRUE'));
-    if(sellable.length===0) sellEl.innerHTML = `<div class="empty-state">—</div>`;
-    if(unsellable.length===0) unsellEl.innerHTML = `<div class="empty-state">—</div>`;
+    if(sellable.length===0) sellEl.innerHTML = `<div class="empty-state">-</div>`;
+    if(unsellable.length===0) unsellEl.innerHTML = `<div class="empty-state">-</div>`;
     sellable.forEach(it => sellEl.appendChild(sellableCard(it)));
     unsellable.forEach(it => unsellEl.appendChild(unsellableCard(it)));
     applyLang();
@@ -188,12 +189,16 @@
     unsellEl.querySelectorAll('[data-confirm-donate]').forEach(b=> b.addEventListener('click', async ()=>{
       const id = b.dataset.confirmDonate;
       const form = document.getElementById('donate-form-'+id);
+      b.disabled = true;
+      const proofPhoto = await uploadPhotoIfAny(form.querySelector('.dd-proof-file'));
       showToast(t('saving'));
       await apiPost('setStockAction', {
         itemId: id, action: 'donate',
         destination: form.querySelector('.dd-dest').value,
         date: form.querySelector('.dd-date').value,
+        proofPhoto,
       });
+      b.disabled = false;
       showToast(t('saved')); loadStock();
     }));
     unsellEl.querySelectorAll('[data-weight]').forEach(b=> b.addEventListener('click', async ()=>{
