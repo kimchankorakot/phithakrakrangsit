@@ -108,10 +108,14 @@ function renderShelf(containerId, entries, opts={}){
         if(items.length === 0){
           panel.innerHTML = `<div class="empty-state" data-i18n="empty_batch_items"></div>`;
         } else {
+          const outcomeLabels = { sold: 'outcome_sold', donated: 'outcome_donated', received: 'outcome_received', shipped: 'outcome_shipped', income: 'outcome_income' };
           panel.innerHTML = items.map(it => `
             <div class="batch-item-row">
-              <span>${it.title || ''}</span>
-              <span class="outcome">${it.outcome === 'sold' ? t('outcome_sold') : t('outcome_donated')} ${it.destinationOrAmount || ''}</span>
+              <span style="display:flex; align-items:center; gap:8px;">
+                ${it.photo ? `<img src="${it.photo}" style="width:28px; height:28px; border-radius:6px; object-fit:cover; flex:0 0 auto;">` : ''}
+                ${it.title || ''}
+              </span>
+              <span class="outcome">${t(outcomeLabels[it.outcome] || 'outcome_sold')} ${it.destinationOrAmount || ''}</span>
             </div>`).join('');
         }
         applyLang();
@@ -142,7 +146,7 @@ function renderShopGrid(containerId, items, onOrder){
         <div class="price">฿${it.price || 0}</div>
         ${soldOut
           ? `<span class="sold" data-i18n="sold_out"></span>`
-          : `<span class="qty-badge">${t('left_count',{n:remaining})}</span><button class="btn btn-primary btn-sm" data-id="${it.id}">${t('order_btn')}</button>`}
+          : `<span class="qty-badge qty-available">${t('left_count',{n:remaining})}</span><button class="btn btn-primary btn-sm" data-id="${it.id}">${t('order_btn')}</button>`}
       </div>
     </div>`;
   }).join('')}</div>`;
