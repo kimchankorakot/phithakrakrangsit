@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>การเงิน — พิทักษ์รักษ์รังสิต</title>
+<title>การเงิน · พิทักษ์รักรังสิต</title>
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -62,6 +62,7 @@
 
   <hr class="section-divider" style="margin:36px 0;">
   <div class="section-title"><h2 style="font-size:1.1rem;" data-i18n="finance_ledger_title"></h2></div>
+  <div id="finance-summary" style="margin-bottom:16px;"></div>
   <div id="finance-ledger"></div>
 </main>
 
@@ -95,33 +96,43 @@
     </div>`;
   }
   async function loadOrders(){
-    const res = await apiGet('getOrders', {});
+    const [ordersRes, stockRes] = await Promise.all([apiGet('getOrders', {}), apiGet('getStock', {})]);
     const list = document.getElementById('orders-list');
-    const orders = (res && res.data) || [];
-    if(orders.length === 0){ list.innerHTML = `<div class="empty-state">—</div>`; return; }
-    list.innerHTML = orders.map(o => `
+    const orders = (ordersRes && ordersRes.data) || [];
+    const stockById = {};
+    ((stockRes && stockRes.data) || []).forEach(s => { stockById[s.id] = s; });
+    if(orders.length === 0){ list.innerHTML = `<div class="empty-state">-</div>`; return; }
+    list.innerHTML = orders.map(o => {
+      const itemTitle = (stockById[o.itemId] && (stockById[o.itemId].title || stockById[o.itemId].category)) || o.itemId;
+      const status = o.status || 'pending';
+      const statusLabel = { pending: t('status_pending'), approved: t('approve'), shipped: t('status_shipped'), rejected: t('reject') }[status] || status;
+      return `
       <div class="card" style="margin-bottom:14px;">
         <div style="display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;">
           <div>
-            <div style="font-weight:700;">${o.name} · ฿${o.price ?? ''}</div>
-            <div style="color:var(--ink-soft); font-size:0.88rem;">${o.contact || ''} — ${o.address || ''}</div>
+            <div style="font-weight:700;">${o.name} - ${itemTitle}</div>
+            <div style="color:var(--ink-soft); font-size:0.88rem;">${o.contact || ''} · ฿${o.price ?? ''} · ${o.address || ''}</div>
             ${o.slip ? `<a href="${o.slip}" target="_blank" style="font-size:0.85rem; color:var(--rust);">slip →</a>` : ''}
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            <span class="badge ${o.status || 'pending'}">${o.status || 'pending'}</span>
-            ${o.status === 'pending' ? `
+            <span class="badge ${status}">${statusLabel}</span>
+            ${status === 'pending' ? `
               <button class="btn btn-primary btn-sm" data-act="approve" data-id="${o.id}">${t('approve')}</button>
               <button class="btn btn-ghost btn-sm" data-act="reject" data-id="${o.id}">${t('reject')}</button>` : ''}
+            ${status === 'approved' ? `
+              <button class="btn btn-primary btn-sm" data-act="ship" data-id="${o.id}">${t('mark_shipped')}</button>` : ''}
             <button class="btn btn-ghost btn-sm" data-oedit-toggle="${o.id}" data-i18n="edit"></button>
             <button class="btn btn-ghost btn-sm" data-odelete="${o.id}" data-i18n="delete"></button>
           </div>
         </div>
         ${orderEditForm(o)}
-      </div>`).join('');
+      </div>`;
+    }).join('');
     applyLang();
     list.querySelectorAll('button[data-act]').forEach(b=>{
       b.addEventListener('click', async ()=>{
-        await apiPost(b.dataset.act === 'approve' ? 'approveOrder' : 'rejectOrder', { orderId: b.dataset.id });
+        const action = b.dataset.act === 'approve' ? 'approveOrder' : b.dataset.act === 'ship' ? 'markShipped' : 'rejectOrder';
+        await apiPost(action, { orderId: b.dataset.id });
         loadOrders(); loadFinance();
       });
     });
@@ -157,7 +168,7 @@
       const res = await apiGet('getStock', {});
       const items = ((res && res.data) || []).filter(i => i.action === 'weight');
       const sel = document.getElementById('oi-item');
-      sel.innerHTML = items.map(i => `<option value="${i.id}">${i.title || i.category}</option>`).join('') || `<option value="">—</option>`;
+      sel.innerHTML = items.map(i => `<option value="${i.id}">${i.title || i.category}</option>`).join('') || `<option value="">-</option>`;
     }
   });
   document.getElementById('other-form').addEventListener('submit', async (e)=>{
@@ -201,14 +212,31 @@
     const res = await apiGet('getFinance', {});
     const rows = (res && res.data) || [];
     const el = document.getElementById('finance-ledger');
-    if(rows.length === 0){ el.innerHTML = `<div class="empty-state">—</div>`; return; }
+    const summaryEl = document.getElementById('finance-summary');
+    const income = rows.filter(r => r.type === 'order' || r.type === 'other').reduce((s,r)=> s + Number(r.amount||0), 0);
+    const expense = rows.filter(r => r.type === 'donation').reduce((s,r)=> s + Number(r.amount||0), 0);
+    const net = income - expense;
+    if(rows.length === 0){
+      el.innerHTML = `<div class="empty-state">-</div>`;
+      summaryEl.innerHTML = '';
+      return;
+    }
+    summaryEl.innerHTML = `<div class="stat-grid" style="margin:0;">
+      <div class="stat-card"><div class="icon" style="background:rgba(62,133,119,0.14); color:var(--sage);">+</div>
+        <div><div class="stat-num" style="color:var(--sage); font-size:1.5rem;">฿${income.toLocaleString()}</div><div class="stat-label">${t('total_income')}</div></div></div>
+      <div class="stat-card"><div class="icon" style="background:rgba(192,57,43,0.12); color:var(--danger);">-</div>
+        <div><div class="stat-num" style="color:var(--danger); font-size:1.5rem;">฿${expense.toLocaleString()}</div><div class="stat-label">${t('total_expense')}</div></div></div>
+      <div class="stat-card"><div class="icon">=</div>
+        <div><div class="stat-num" style="font-size:1.5rem;">฿${net.toLocaleString()}</div><div class="stat-label">${t('net_balance')}</div></div></div>
+    </div>`;
     const typeLabel = { order: t('type_order'), other: t('type_other'), donation: t('type_donation') };
     el.innerHTML = `<div class="card"><table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
       <thead><tr style="text-align:left; border-bottom:1px solid var(--line);">
         <th style="padding:6px;">${t('f_date')}</th><th>${t('f_type')}</th><th>${t('f_donor')}</th><th>${t('f_amount')}</th><th>${t('f_dest')}</th><th></th>
       </tr></thead>
       <tbody>${rows.map(r=>`<tr style="border-bottom:1px solid var(--line);">
-        <td style="padding:6px;">${r.date||''}</td><td>${typeLabel[r.type]||r.type||''}</td><td>${r.donor||''}</td><td>฿${r.amount||0}</td><td>${r.destination||''}</td>
+        <td style="padding:6px;">${r.date||''}</td><td>${typeLabel[r.type]||r.type||''}</td><td>${r.donor||''}</td>
+        <td style="color:${r.type==='donation' ? 'var(--danger)' : 'var(--sage)'};">${r.type==='donation'?'-':'+'}฿${r.amount||0}</td><td>${r.destination||''}</td>
         <td><button class="btn btn-ghost btn-sm" data-fdelete="${r.id}" data-i18n="delete"></button></td>
       </tr>`).join('')}</tbody>
     </table></div>`;
