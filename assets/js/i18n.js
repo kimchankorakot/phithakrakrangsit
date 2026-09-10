@@ -27,7 +27,7 @@ const I18N = {
     timeline_preview_title: "ความเคลื่อนไหวล่าสุด", see_all: "ดูไทม์ไลน์แบบละเอียด →",
     timeline_title: "ไทม์ไลน์การทำงาน", timeline_lede: "สิ่งที่ชุมนุมทำไปแล้ว เรียงจากล่าสุด คลิกแต่ละรายการเพื่อดูรายละเอียด",
     status_pending: "รอดำเนินการ", status_done: "ดำเนินการแล้ว",
-    outcome_donated: "บริจาคให้", outcome_sold: "ขายได้",
+    outcome_donated: "บริจาคให้", outcome_sold: "ขายได้", outcome_received: "รับเข้าสต็อก", outcome_shipped: "จัดส่งแล้วถึง", outcome_income: "รายได้อื่น",
     empty_timeline: "ยังไม่มีรายการในไทม์ไลน์", empty_batch_items: "ยังไม่มีรายละเอียดรายการย่อย",
 
     shopping_title: "สินค้าที่เปิดขาย", shopping_lede: "รายได้จากการขายทุกบาททุกสตางค์ นำไปบริจาคต่อ",
@@ -61,6 +61,9 @@ const I18N = {
     f_donor: "ชื่อผู้บริจาค/ผู้ซื้อ", f_amount: "จำนวนเงิน (บาท)", f_note: "รายละเอียดเพิ่มเติม",
     finance_donation_title: "บันทึกบริจาคเงินหลังการขาย", f_dest: "บริจาคให้ (มูลนิธิ/ทัณฑสถาน)", f_donationBy: "โดยใคร",
     finance_ledger_title: "สมุดบัญชีการเงิน", f_date: "วันที่", f_type: "ประเภทรายการ",
+    total_income: "รายรับรวม", total_expense: "รายจ่ายรวม (บริจาคออก)", net_balance: "คงเหลือสุทธิ",
+    mark_shipped: "ทำเครื่องหมายว่าจัดส่งแล้ว", status_shipped: "จัดส่งแล้ว",
+    f_proofPhoto: "รูปหลักฐานการบริจาค",
     type_order: "ขายสินค้า", type_other: "รายได้อื่น", type_donation: "บริจาคเงิน",
 
     ph_club_label: "ภาพกิจกรรมของชุมนุม", ph_donation_label: "ภาพการส่งมอบและบริจาค",
@@ -101,7 +104,7 @@ const I18N = {
     timeline_preview_title: "Latest activity", see_all: "View full timeline →",
     timeline_title: "Activity Timeline", timeline_lede: "Everything the club has done, most recent first. Click an entry for details.",
     status_pending: "In progress", status_done: "Completed",
-    outcome_donated: "Donated to", outcome_sold: "Sold for",
+    outcome_donated: "Donated to", outcome_sold: "Sold for", outcome_received: "Received into stock", outcome_shipped: "Shipped to", outcome_income: "Other income",
     empty_timeline: "No timeline entries yet", empty_batch_items: "No item details yet",
 
     shopping_title: "Items for sale", shopping_lede: "Every baht of proceeds goes back into donations",
@@ -135,6 +138,9 @@ const I18N = {
     f_donor: "Donor/buyer name", f_amount: "Amount (THB)", f_note: "Additional detail",
     finance_donation_title: "Log a post-sale donation", f_dest: "Donated to (foundation/facility)", f_donationBy: "By whom",
     finance_ledger_title: "Finance ledger", f_date: "Date", f_type: "Type",
+    total_income: "Total income", total_expense: "Total expense (donated out)", net_balance: "Net balance",
+    mark_shipped: "Mark as shipped", status_shipped: "Shipped",
+    f_proofPhoto: "Donation proof photo",
     type_order: "Sale", type_other: "Other income", type_donation: "Cash donation",
 
     ph_club_label: "Photos of club activities", ph_donation_label: "Photos of handovers and donations",
