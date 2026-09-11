@@ -132,7 +132,9 @@
     list.querySelectorAll('button[data-act]').forEach(b=>{
       b.addEventListener('click', async ()=>{
         const action = b.dataset.act === 'approve' ? 'approveOrder' : b.dataset.act === 'ship' ? 'markShipped' : 'rejectOrder';
-        await apiPost(action, { orderId: b.dataset.id });
+        showToast(t('saving'));
+        const res = await apiPost(action, { orderId: b.dataset.id });
+        reportSaveResult(res);
         loadOrders(); loadFinance();
       });
     });
@@ -146,18 +148,18 @@
       const id = b.dataset.osave;
       const form = document.getElementById('oedit-'+id);
       showToast(t('saving'));
-      await apiPost('updateOrder', {
+      const res = await apiPost('updateOrder', {
         orderId: id,
         name: form.querySelector('.oe-name').value,
         contact: form.querySelector('.oe-contact').value,
         address: form.querySelector('.oe-address').value,
       });
-      showToast(t('saved')); loadOrders();
+      reportSaveResult(res); loadOrders();
     }));
     list.querySelectorAll('[data-odelete]').forEach(b=> b.addEventListener('click', async ()=>{
       if(!confirm(t('confirm_delete'))) return;
-      await apiPost('deleteOrder', { orderId: b.dataset.odelete });
-      loadOrders();
+      const res = await apiPost('deleteOrder', { orderId: b.dataset.odelete });
+      reportSaveResult(res); loadOrders();
     }));
   }
 
@@ -178,7 +180,7 @@
     const isWeight = document.getElementById('oi-isweight').checked;
     const slipUrl = await uploadPhotoIfAny(document.getElementById('oi-slip-file'));
     showToast(t('saving'));
-    await apiPost('addOtherIncome', {
+    const res = await apiPost('addOtherIncome', {
       isWeightSale: isWeight,
       itemId: isWeight ? document.getElementById('oi-item').value : '',
       donor: document.getElementById('oi-donor').value,
@@ -187,7 +189,7 @@
       slip: slipUrl,
     });
     submitBtn.disabled = false;
-    showToast(t('saved'));
+    reportSaveResult(res);
     document.getElementById('other-form').reset();
     document.getElementById('oi-pick-field').style.display = 'none';
     loadFinance();
@@ -197,12 +199,12 @@
   document.getElementById('donation-form').addEventListener('submit', async (e)=>{
     e.preventDefault();
     showToast(t('saving'));
-    await apiPost('addPostSaleDonation', {
+    const res = await apiPost('addPostSaleDonation', {
       amount: Number(document.getElementById('fd-amount').value || 0),
       destination: document.getElementById('fd-dest').value,
       donor: document.getElementById('fd-by').value,
     });
-    showToast(t('saved'));
+    reportSaveResult(res);
     document.getElementById('donation-form').reset();
     loadFinance();
   });
@@ -243,8 +245,8 @@
     applyLang();
     el.querySelectorAll('[data-fdelete]').forEach(b=> b.addEventListener('click', async ()=>{
       if(!confirm(t('confirm_delete'))) return;
-      await apiPost('deleteFinanceEntry', { financeId: b.dataset.fdelete });
-      loadFinance();
+      const res = await apiPost('deleteFinanceEntry', { financeId: b.dataset.fdelete });
+      reportSaveResult(res); loadFinance();
     }));
   }
 
