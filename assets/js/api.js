@@ -1,7 +1,7 @@
 /* พิทักษ์รักรังสิต - API wrapper
    ตั้งค่า SCRIPT_URL ให้เป็น URL ของ Google Apps Script Web App ที่ deploy แล้ว
    (ดูวิธีทำใน apps-script/README ที่แนบมาให้)                                */
-const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyIq3K-ba6M7EilpqIrWJ6YAfEV0wasd4TBc28B6BWCdKgk3pRLCeA9xh9U9JKN0PSCQg/exec";
 
 function isConnected(){
   return SCRIPT_URL && SCRIPT_URL.indexOf("PASTE_") !== 0;
