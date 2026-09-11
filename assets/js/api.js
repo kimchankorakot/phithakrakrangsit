@@ -1,7 +1,7 @@
-/* หนังสือแบ่งปัน — API wrapper
+/* พิทักษ์รักรังสิต - API wrapper
    ตั้งค่า SCRIPT_URL ให้เป็น URL ของ Google Apps Script Web App ที่ deploy แล้ว
    (ดูวิธีทำใน apps-script/README ที่แนบมาให้)                                */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAf12HKKB_4ttBiHUE76DU0BWX74atu-0pxZ99XvuAT7TaAs1cjB5WRcJ-Y4pp6i3EwA/exec";
+const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
 function isConnected(){
   return SCRIPT_URL && SCRIPT_URL.indexOf("PASTE_") !== 0;
@@ -38,7 +38,7 @@ async function apiGet(action, params={}){
   }
 }
 
-/* Writes: doPost(e) — Apps Script Web Apps only accept POST as text/plain
+/* Writes: doPost(e): Apps Script Web Apps only accept POST as text/plain
    to avoid CORS preflight, so we JSON.stringify the whole payload as the body. */
 async function apiPost(action, payload={}){
   if(!isConnected()){ showToast(t('connect_needed')); return { ok:false }; }
@@ -95,6 +95,18 @@ async function uploadPhotoIfAny(fileInputEl){
   }catch(err){
     console.error(err); showToast(t('upload_error')); return '';
   }
+}
+
+/* Shows a proper "saved" or "error: <detail>" toast based on the actual response,
+   instead of blindly claiming success. Returns true/false so callers can branch on it. */
+function reportSaveResult(res, successMsg){
+  if(res && res.ok){
+    showToast(successMsg || t('saved'));
+    return true;
+  }
+  const detail = (res && res.error) ? (' (' + res.error + ')') : '';
+  showToast(t('error_generic') + detail);
+  return false;
 }
 
 /* ---------------- Admin session (shared staff password) ---------------- */
