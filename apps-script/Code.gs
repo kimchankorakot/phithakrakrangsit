@@ -1,5 +1,5 @@
 /**
- * พิทักษ์รักษ์รังสิต — Backend (Google Apps Script)
+ * พิทักษ์รักรังสิต — Backend (Google Apps Script)
  * -----------------------------------------------------------------
  * วิธีติดตั้ง: ดู apps-script/README.md
  *
@@ -15,7 +15,7 @@
  *   TimelineItems : id | timelineId | title | outcome | destinationOrAmount | createdAt
  *   Sessions      : token | createdAt
  *
- * รูปภาพที่อัปโหลดจะถูกเก็บใน Google Drive โฟลเดอร์ชื่อ "พิทักษ์รักษ์รังสิต - รูปภาพ"
+ * รูปภาพที่อัปโหลดจะถูกเก็บใน Google Drive โฟลเดอร์ชื่อ "พิทักษ์รักรังสิต - รูปภาพ"
  * (สคริปต์สร้างโฟลเดอร์นี้ให้อัตโนมัติในไดรฟ์ของบัญชีที่ deploy Web App — ดู "Execute as" ในขั้นตอน deploy)
  *
  * ระบบล็อกอินนี้ใช้รหัสผ่านเดียวร่วมกันสำหรับเจ้าหน้าที่ทุกคน (ง่าย ไม่ต้องสร้าง Google Client ID
@@ -28,8 +28,9 @@ const SHEETS = {
   ORDERS: { name: 'Orders', cols: ['id','itemId','qty','name','contact','address','slip','price','status','createdAt'] },
   FINANCE: { name: 'Finance', cols: ['id','date','type','donor','amount','destination','note','itemId','slip','createdAt'] },
   TIMELINE: { name: 'Timeline', cols: ['id','date','photo','summary','status','createdAt'] },
-  TIMELINE_ITEMS: { name: 'TimelineItems', cols: ['id','timelineId','title','outcome','destinationOrAmount','createdAt'] },
+  TIMELINE_ITEMS: { name: 'TimelineItems', cols: ['id','timelineId','title','outcome','destinationOrAmount','photo','createdAt'] },
   SESSIONS: { name: 'Sessions', cols: ['token','createdAt'] },
+  SETTINGS: { name: 'Settings', cols: ['key','value'] },
 };
 
 function getSheet_(key){
@@ -39,6 +40,16 @@ function getSheet_(key){
   if(!sh){
     sh = ss.insertSheet(cfg.name);
     sh.appendRow(cfg.cols);
+    return sh;
+  }
+  // Auto-migrate: sheets created before this schema had extra columns are missing
+  // those column names in row 1, which breaks header-name lookups (updateWhere_/readAll_)
+  // even though appendRow_ has been writing values into those positions all along.
+  const lastCol = sh.getLastColumn();
+  const header = lastCol > 0 ? sh.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+  const missing = cfg.cols.filter(c => header.indexOf(c) === -1);
+  if(missing.length > 0){
+    sh.getRange(1, header.length + 1, 1, missing.length).setValues([missing]);
   }
   return sh;
 }
@@ -104,7 +115,17 @@ function newId_(){ return Utilities.getUuid().slice(0,8); }
 function json_(obj){
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
-function today_(){ return new Date().toISOString().slice(0,10); }
+function today_(){ return Utilities.formatDate(new Date(), 'Asia/Bangkok', 'yyyy-MM-dd'); }
+
+function getSetting_(key, fallback){
+  const row = readAll_('SETTINGS').find(r => r.key === key);
+  return row ? row.value : fallback;
+}
+function setSetting_(key, value){
+  const existing = readAll_('SETTINGS').find(r => r.key === key);
+  if(existing){ updateWhere_('SETTINGS', 'key', key, { value }); }
+  else{ appendRow_('SETTINGS', { key, value }); }
+}
 
 /* Find today's (or given date's) timeline batch or create a new one, then attach a line item to it */
 function logTimelineItem_(date, title, outcome, destinationOrAmount, photo){
@@ -119,7 +140,7 @@ function logTimelineItem_(date, title, outcome, destinationOrAmount, photo){
     appendRow_('TIMELINE', { id: batchId, date: d, photo: photo || '', summary: '', status: 'done', createdAt: new Date().toISOString() });
   }
   appendRow_('TIMELINE_ITEMS', {
-    id: newId_(), timelineId: batchId, title, outcome, destinationOrAmount, createdAt: new Date().toISOString(),
+    id: newId_(), timelineId: batchId, title, outcome, destinationOrAmount, photo: photo || '', createdAt: new Date().toISOString(),
   });
   const items = readAll_('TIMELINE_ITEMS').filter(i => i.timelineId === batchId);
   updateWhere_('TIMELINE', 'id', batchId, { summary: 'รายการ ' + items.length + ' ชิ้น' });
@@ -153,7 +174,7 @@ function getUploadFolder_(){
   if(existingId){
     try{ return DriveApp.getFolderById(existingId); }catch(e){ /* fall through and recreate */ }
   }
-  const folder = DriveApp.createFolder('พิทักษ์รักษ์รังสิต - รูปภาพ');
+  const folder = DriveApp.createFolder('พิทักษ์รักรังสิต - รูปภาพ');
   props.setProperty('DRIVE_FOLDER_ID', folder.getId());
   return folder;
 }
@@ -212,11 +233,10 @@ function doGet(e){
         return json_({ ok:true, data: rows });
       }
       case 'getStats': {
-        const stock = readAll_('STOCK');
-        const timeline = readAll_('TIMELINE');
         return json_({ ok:true, data: {
-          books: stock.reduce((s,r)=> s + Number(r.quantity||0), 0),
-          deliveries: timeline.filter(t=> t.status === 'done').length,
+          itemsDelivered: getSetting_('itemsDelivered', '0'),
+          placesContacted: getSetting_('placesContacted', '0'),
+          memberCount: getSetting_('memberCount', '21'),
         }});
       }
       default:
@@ -293,6 +313,12 @@ function doPost(e){
         });
         return json_({ ok:true });
       }
+      case 'updateStat': {
+        const allowedKeys = ['itemsDelivered', 'placesContacted', 'memberCount'];
+        if(allowedKeys.indexOf(body.key) === -1) return json_({ ok:false, error:'unknown stat key' });
+        setSetting_(body.key, String(body.value || ''));
+        return json_({ ok:true });
+      }
 
       /* ---- Stock ---- */
       case 'addStockItem': {
@@ -301,6 +327,8 @@ function doPost(e){
           quantity: body.quantity || 1, sellable: !!body.sellable, price: body.price || 0,
           soldCount: 0, reservedCount: 0, action: '', donateDestination: '', donateDate: '', createdAt: now,
         });
+        logTimelineItem_(today_(), body.title || body.category, 'received',
+          (body.quantity || 1) + ' ชิ้น' + (body.sellable ? ' (ราคา ฿' + (body.price||0) + ')' : ''), body.photo);
         return json_({ ok:true });
       }
       case 'updateStockItem': {
@@ -328,7 +356,9 @@ function doPost(e){
         if(body.action === 'donate'){
           const item = findOne_('STOCK', 'id', body.itemId);
           updateWhere_('STOCK', 'id', body.itemId, { soldCount: item ? item.quantity : 0 });
-          logTimelineItem_(body.date, item ? item.title || item.category : '', 'donated', body.destination, item ? item.photo : '');
+          const qtyLabel = item ? (Number(item.quantity||0) - Number(item.soldCount||0) + ' ชิ้น') : '';
+          logTimelineItem_(body.date, item ? item.title || item.category : '', 'donated',
+            body.destination + (qtyLabel ? ' (' + qtyLabel + ')' : ''), body.proofPhoto || (item ? item.photo : ''));
         }
         return json_({ ok:true });
       }
@@ -367,12 +397,20 @@ function doPost(e){
             soldCount: Number(item.soldCount||0) + Number(order.qty||1),
             reservedCount: Math.max(0, Number(item.reservedCount||0) - Number(order.qty||1)),
           });
-          logTimelineItem_(now.slice(0,10), item.title || item.category, 'sold', order.price, item.photo);
+          logTimelineItem_(today_(), item.title || item.category, 'sold', '฿' + order.price + ' โดย ' + order.name, item.photo);
         }
         appendRow_('FINANCE', {
-          id: newId_(), date: now.slice(0,10), type: 'order', donor: order.name, amount: order.price,
+          id: newId_(), date: today_(), type: 'order', donor: order.name, amount: order.price,
           destination: '', note: 'สั่งซื้อ: ' + (item ? item.title : order.itemId), itemId: order.itemId, slip: order.slip, createdAt: now,
         });
+        return json_({ ok:true });
+      }
+      case 'markShipped': {
+        const order = findOne_('ORDERS', 'id', body.orderId);
+        if(!order || order.status !== 'approved') return json_({ ok:false, error:'order not approved yet' });
+        updateWhere_('ORDERS', 'id', body.orderId, { status: 'shipped' });
+        const item = findOne_('STOCK', 'id', order.itemId);
+        logTimelineItem_(today_(), item ? (item.title || item.category) : order.itemId, 'shipped', order.name, item ? item.photo : '');
         return json_({ ok:true });
       }
       case 'rejectOrder': {
@@ -388,15 +426,17 @@ function doPost(e){
       /* ---- Finance part 2: other income (cash donation or weight-sale) ---- */
       case 'addOtherIncome': {
         appendRow_('FINANCE', {
-          id: newId_(), date: now.slice(0,10), type: 'other', donor: body.donor, amount: body.amount,
+          id: newId_(), date: today_(), type: 'other', donor: body.donor, amount: body.amount,
           destination: '', note: body.note || '', itemId: body.itemId || '', slip: body.slip || '', createdAt: now,
         });
         if(body.isWeightSale && body.itemId){
           const item = findOne_('STOCK', 'id', body.itemId);
           if(item){
             updateWhere_('STOCK', 'id', body.itemId, { soldCount: item.quantity });
-            logTimelineItem_(now.slice(0,10), item.title || item.category, 'sold', body.amount, item.photo);
+            logTimelineItem_(today_(), item.title || item.category, 'sold', '฿' + body.amount + ' (ชั่งกิโลขาย)', item.photo);
           }
+        } else {
+          logTimelineItem_(today_(), 'รายได้อื่นจาก ' + body.donor, 'income', '฿' + body.amount, body.slip || '');
         }
         return json_({ ok:true });
       }
@@ -404,10 +444,10 @@ function doPost(e){
       /* ---- Finance part 3: post-sale donation -> shows on Timeline ---- */
       case 'addPostSaleDonation': {
         appendRow_('FINANCE', {
-          id: newId_(), date: now.slice(0,10), type: 'donation', donor: body.donor, amount: body.amount,
+          id: newId_(), date: today_(), type: 'donation', donor: body.donor, amount: body.amount,
           destination: body.destination, note: '', itemId: '', slip: '', createdAt: now,
         });
-        logTimelineItem_(now.slice(0,10), 'บริจาคเงินโดย ' + body.donor, 'donated', body.destination + ' (฿' + body.amount + ')', '');
+        logTimelineItem_(today_(), 'บริจาคเงินโดย ' + body.donor, 'donated', body.destination + ' (฿' + body.amount + ')', '');
         return json_({ ok:true });
       }
       case 'deleteFinanceEntry': {
