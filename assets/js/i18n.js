@@ -35,6 +35,7 @@ const I18N = {
     empty_shopping: "ยังไม่มีสินค้าเปิดขายตอนนี้",
     order_form_title: "แบบฟอร์มจองซื้อ", f_name: "ชื่อผู้สั่งซื้อ", f_contact: "ช่องทางติดต่อ (เบอร์โทร/LINE)",
     f_address: "ที่อยู่จัดส่ง", f_slip: "แนบหลักฐานการโอนเงิน (รูปภาพ)", f_submit: "ส่งคำสั่งซื้อ",
+    f_payment_info: "ช่องทางการโอนเงิน", payment_qr_missing: "ยังไม่ได้ตั้งค่าช่องทางโอนเงิน กรุณาติดต่อแอดมินก่อนโอน",
     order_submitted: "ส่งคำสั่งซื้อแล้ว รอเจ้าหน้าที่ตรวจสอบและอนุมัติ",
 
     login_title: "เข้าสู่ระบบหลังบ้าน", login_lede: "สำหรับสมาชิกชุมนุมเท่านั้น กรอกรหัสผ่านที่ทางชุมนุมกำหนดไว้",
@@ -112,6 +113,7 @@ const I18N = {
     empty_shopping: "Nothing for sale right now",
     order_form_title: "Reservation form", f_name: "Your name", f_contact: "Contact (phone/LINE)",
     f_address: "Shipping address", f_slip: "Payment proof (photo)", f_submit: "Submit order",
+    f_payment_info: "Payment details", payment_qr_missing: "Payment channel not set up yet, please contact staff before transferring",
     order_submitted: "Order submitted. Waiting for staff approval.",
 
     login_title: "Staff sign in", login_lede: "For club members only. Enter the shared staff password.",
