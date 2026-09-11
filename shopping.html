@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ขายของ — พิทักษ์รักษ์รังสิต</title>
+<title>ขายของ · พิทักษ์รักรังสิต</title>
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -25,6 +25,14 @@
         <div class="field"><label data-i18n="f_name"></label><input required id="f-name"></div>
         <div class="field"><label data-i18n="f_contact"></label><input required id="f-contact"></div>
         <div class="field"><label data-i18n="f_address"></label><textarea required id="f-address"></textarea></div>
+        <div class="field">
+          <label data-i18n="f_payment_info"></label>
+          <div class="payment-qr" id="payment-qr-block">
+            <img src="assets/payment-qr.jpg" alt="ช่องทางการโอนเงิน"
+                 onload="document.getElementById('payment-qr-block').classList.add('has-qr')"
+                 onerror="document.getElementById('payment-qr-block').outerHTML = '<div class=&quot;empty-state&quot; id=&quot;payment-qr-block&quot; style=&quot;padding:16px; background:var(--paper-dim); border-radius:var(--radius);&quot; data-i18n=&quot;payment_qr_missing&quot;></div>'; applyLang();">
+          </div>
+        </div>
         <div class="field"><label data-i18n="f_slip"></label><input type="file" accept="image/*" id="f-slip-file"></div>
         <button class="btn btn-primary" type="submit" data-i18n="f_submit"></button>
         <button class="btn btn-ghost" type="button" id="cancel-order" style="margin-left:8px;">✕</button>
