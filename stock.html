@@ -135,7 +135,7 @@
       const newPhoto = await uploadPhotoIfAny(form.querySelector('.e-photo-file'));
       showToast(t('saving'));
       const priceEl = form.querySelector('.e-price');
-      await apiPost('updateStockItem', {
+      const res = await apiPost('updateStockItem', {
         itemId: id,
         photo: newPhoto || undefined,
         title: form.querySelector('.e-title').value,
@@ -143,7 +143,7 @@
         quantity: Number(form.querySelector('.e-qty').value || 1),
         price: priceEl ? Number(priceEl.value || 0) : undefined,
       });
-      showToast(t('saved')); loadStock();
+      reportSaveResult(res); loadStock();
     }));
     scopeEl.querySelectorAll('[data-delete]').forEach(b=> b.addEventListener('click', async ()=>{
       if(!confirm(t('confirm_delete'))) return;
@@ -180,8 +180,8 @@
       const destination = scope.querySelector('.rdest').value;
       const date = scope.querySelector('.rdate').value;
       showToast(t('saving'));
-      await apiPost('recordSale', { itemId: id, qty, destination, date });
-      showToast(t('saved')); loadStock();
+      const res = await apiPost('recordSale', { itemId: id, qty, destination, date });
+      reportSaveResult(res); loadStock();
     }));
     unsellEl.querySelectorAll('[data-donate]').forEach(b=> b.addEventListener('click', ()=>{
       document.getElementById('donate-form-'+b.dataset.donate).classList.toggle('open');
@@ -192,19 +192,19 @@
       b.disabled = true;
       const proofPhoto = await uploadPhotoIfAny(form.querySelector('.dd-proof-file'));
       showToast(t('saving'));
-      await apiPost('setStockAction', {
+      const res = await apiPost('setStockAction', {
         itemId: id, action: 'donate',
         destination: form.querySelector('.dd-dest').value,
         date: form.querySelector('.dd-date').value,
         proofPhoto,
       });
       b.disabled = false;
-      showToast(t('saved')); loadStock();
+      reportSaveResult(res); loadStock();
     }));
     unsellEl.querySelectorAll('[data-weight]').forEach(b=> b.addEventListener('click', async ()=>{
       showToast(t('saving'));
-      await apiPost('setStockAction', { itemId: b.dataset.weight, action: 'weight' });
-      showToast(t('marked_weight')); loadStock();
+      const res = await apiPost('setStockAction', { itemId: b.dataset.weight, action: 'weight' });
+      reportSaveResult(res, t('marked_weight')); loadStock();
     }));
   }
 
@@ -215,7 +215,7 @@
     const sellable = document.querySelector('input[name="sellable"]:checked').value === 'yes';
     const photoUrl = await uploadPhotoIfAny(document.getElementById('s-photo-file'));
     showToast(t('saving'));
-    await apiPost('addStockItem', {
+    const res = await apiPost('addStockItem', {
       photo: photoUrl,
       title: document.getElementById('s-title').value,
       category: document.getElementById('s-category').value,
@@ -224,7 +224,7 @@
       price: sellable ? Number(document.getElementById('s-price').value || 0) : 0,
     });
     submitBtn.disabled = false;
-    showToast(t('saved'));
+    reportSaveResult(res);
     document.getElementById('stock-form').reset();
     loadStock();
   });
